@@ -1,15 +1,18 @@
 package m4.gioia.dashboard_gestione_tickets.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-public class Categoria {
+@Table(name = "categorie")
+public class Categoria extends DataBase {
 
     /*
      * PK -> id (unique)
@@ -17,14 +20,17 @@ public class Categoria {
      * 
      * relazoione 1 -> n ticket
      */
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idCategoria;
 
-    @NotBlank("Il nome non può essere vuoto")
-    @NotNull("Il nome non può essere nullo")
-    private String nomeCategoria;
+    @NotNull
+    @NotBlank
+    @Column(unique = true, nullable = false)
+    private String name;
 
-    @OneToMany(mappedBy = "categoria")
-    private List<Ticket> tickets;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

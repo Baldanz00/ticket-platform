@@ -1,0 +1,58 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}" />
+
+    <link rel="stylesheet" th:href="@{/css/application.css}">
+    <title>Home</title>
+</head>
+
+
+<body>
+    <nav th:replace="~{navbar :: navbar('Home')}"></nav>
+    
+    <!-- Hero Section -->
+    <div class="container-fluid bg-primary text-white py-5">
+        <div class="container text-center py-5">
+            <h1 class="display-3 fw-bold mb-4">Welcome to the Ticketing System</h1>
+            <p class="lead mb-4">Manage and monitor all your tickets simply and effectively</p>
+            <a href="/tickets" class="btn btn-light btn-lg px-5">Go to Tickets</a>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="bg-light py-5">
+        <div class="container">
+            <h2 class="text-center mb-5">System Statistics</h2>
+            <div class="row text-center">
+                <div class="col-md-3 mb-4">
+                    <h3 class="display-4 text-primary fw-bold" th:text="${totalTickets}"></h3>
+                    <p class="text-muted">Total Tickets</p>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h3 class="display-4 text-success fw-bold" th:text="${completedTickets}"></h3>
+                    <p class="text-muted">Completed</p>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h3 class="display-4 text-warning fw-bold" th:text="${inProgressTickets}"></h3>
+                    <p class="text-muted">In Progress</p>
+                </div>
+                <div class="col-md-3 mb-4">
+                    <h3 class="display-4 text-danger fw-bold" th:text="${toDoTickets}"></h3>
+                    <p class="text-muted">Open</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap Bundle with Popper -->
+    <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.bundle.min.js}"></script>
+</body>
+
+</html>

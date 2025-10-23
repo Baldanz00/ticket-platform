@@ -1,0 +1,158 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}" />
+
+    <link rel="stylesheet" th:href="@{/css/application.css}">
+    <title th:text="|Edit ${ticket.title}|"></title>
+</head>
+
+
+<body>
+<nav th:replace="~{navbar :: navbar('Home')}"></nav>
+<div class="container">
+    <div class="content">
+
+
+        <h1 class="text-center py-3">Ticket</h1>
+        <hr />
+
+
+        <form id="ticket-form" th:object="${ticket}" th:action="@{/tickets/edit/{id}(id=${ticket.id})}" method="post">
+            <ul th:if="${#fields.hasErrors('*')}">
+                <li th:each="err : ${#fields.errors('*')}" th:text="${err}">Input is incorrect</li>
+            </ul>
+            <div class="row">
+                <div class="col-8">
+                    <div class="row gy-2">
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" for="title">Title</label>
+                            <input id="title" type="text" class="form-control" th:field="*{title}" th:errorClass="is-invalid" placeholder="Insert Ticket's title" th:attr="readonly=${!isAdmin}">
+                            <div th:if="${#fields.hasErrors('title')}" class="invalid-feedback">
+                                <ul class="mb-0">
+                                    <li th:each="err : ${#fields.errors('title')}" th:text="${err}"></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold" for="description">Description</label>
+                            <textarea id="description" class="form-control" th:field="*{description}" th:errorClass="is-invalid" rows="5" placeholder="Describe the problem" th:attr="readonly=${!isAdmin}"></textarea>
+                            <div th:if="${#fields.hasErrors('description')}" class="invalid-feedback">
+                                <ul class="mb-0">
+                                    <li th:each="err : ${#fields.errors('description')}" th:text="${err}"></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="status">Status</label>
+                            <select id="status" class="form-select" th:field="*{status}" th:errorClass="is-invalid" th:attr="disabled=${!(isAdmin or isOperator)}">
+                                <option th:each="item : ${statusNamesList}" th:value="${item}" th:text="${item}"></option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('status')}" class="invalid-feedback">
+                                <ul class="mb-0">
+                                    <li th:each="err : ${#fields.errors('status')}" th:text="${err}"></li>
+                                </ul>
+                            </div>
+
+                            <input type="hidden" th:if="${!(isAdmin or isOperator)}" th:field="*{status}" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold" for="category">Category</label>
+                            <select id="category" class="form-select" th:field="*{category.id}" th:errorClass="is-invalid" th:attr="disabled=${!isAdmin}">
+                                <option value="">Select a category</option>
+                                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('category')}" class="invalid-feedback">
+                                <ul class="mb-0">
+                                    <li th:each="err : ${#fields.errors('category')}" th:text="${err}"></li>
+                                </ul>
+                            </div>
+
+                            <input type="hidden" th:if="${!isAdmin}" th:field="*{category.id}" />
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold" for="user">Operator</label>
+                            <select id="user" class="form-select" th:field="*{user.id}" th:errorClass="is-invalid" th:attr="disabled=${!isAdmin}">
+                                <option value="">Select an Operator</option>
+                                <option th:each="operator : ${operators}" th:value="${operator.id}" th:text="${operator.username}"></option>
+                            </select>
+                            <div th:if="${#fields.hasErrors('user')}" class="invalid-feedback">
+                                <ul class="mb-0">
+                                    <li th:each="err : ${#fields.errors('user')}" th:text="${err}"></li>
+                                </ul>
+                            </div>
+
+                            <input type="hidden" th:if="${!isAdmin}" th:field="*{user.id}" />
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button class="btn btn-primary" type="submit">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                     fill="currentColor" class="bi bi-check-lg me-1" viewBox="0 0 16 16"
+                                     style="vertical-align: middle;">
+                                    <path
+                                            d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z" />
+                                </svg>
+                                Save Ticket
+                            </button>
+                            <a th:href="@{/tickets}" class="btn btn-outline-secondary">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                     fill="currentColor" class="bi bi-x-lg me-1" viewBox="0 0 16 16"
+                                     style="vertical-align: middle;">
+                                    <path
+                                            d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z" />
+                                </svg>
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18"
+                                     fill="currentColor" class="bi bi-info-circle me-2"
+                                     viewBox="0 0 16 16" style="vertical-align: middle;">
+                                    <path
+                                            d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                                    <path
+                                            d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533z" />
+                                    <circle cx="8" cy="4.5" r="1" />
+                                </svg>
+                                Information
+                            </h5>
+                            <div class="mb-3">
+                                <small class="text-muted d-block mb-1">Available Statuses:</small>
+                                <div>
+                                    <span class="badge bg-danger me-1">TO_DO</span>
+                                    <span class="badge bg-warning text-dark me-1">IN_PROGRESS</span>
+                                    <span class="badge bg-success">COMPLETED</span>
+                                </div>
+                            </div>
+                            <hr>
+                            <small class="text-muted">
+                                <strong>Note:</strong> All fields are marked as mandatory.
+                                Make sure to fill the form properly before saving.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Bootstrap Bundle with Popper -->
+<script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.bundle.min.js}"></script>
+</body>
+
+</html>

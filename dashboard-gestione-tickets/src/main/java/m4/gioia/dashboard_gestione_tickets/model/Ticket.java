@@ -4,19 +4,16 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale.Category;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 @Entity
-public class Ticket {
+@Table(name = "tickets")
+public class Ticket extends DataBase {
 
     /*
      * id -> PK , unique,
@@ -36,41 +33,6 @@ public class Ticket {
      * 
      */
 
-    @Id // PK
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // autoincrementale
-    private Integer idTicket;
-
-    @NotBlank("Il titolo non può essere vuoto")
-    @Column(nullable = false)
-    private String titolo;
-
-    private String descrizione;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private TicketStato stato = TicketStato.DA_FARE;
-
-    // data di creazione
-    @FutureOrPresent("La data deve essere odierna o futura")
-    private LocalDate dataCreazioneTicket = LocalDate.now();
-
-    // data di modifica del ticket
-    @FutureOrPresent("La data deve essere odierna o futura")
-    private LocalDate dataModificaTicket = LocalDate.now();
-
-    // FK -> id_autore
-
-    // FK -> id_operatore
-    @ManyToOne(optional = false)
-    private Operatore operatore;
-
-    // FK -> id_categoria
-    @ManyToOne(optional = false)
-    private Categoria categoria;
-
-    @OneToMany(mappedBy = "ticket")
-    private List<NoteTicket> notes = new ArrayList<>();
-
     public enum TicketStato {
 
         DA_FARE,
@@ -78,19 +40,49 @@ public class Ticket {
         COMPLETATO;
     }
 
-    public Integer getIdTicket() {
-        return idTicket;
+    @Column(nullable = false)
+    private LocalDate dataCreazione;
+
+    @NotBlank
+    @Column(nullable = false, length = 255)
+    private String titolo;
+
+    @NotBlank
+    @Column(nullable = false, length = 2000)
+    private String descrizione;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TicketStato stato = TicketStato.TO_DO;
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category categoria;
+
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
+    private List<NoteTicket> notes = new ArrayList<>();
+
+    @NotNull
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    public LocalDate getDataCreazione() {
+        return dataCreazione;
     }
 
-    public void setId(Integer idTicket) {
-        this.idTicket = idTicket;
+    public void setCreationDate(LocalDate dataCreazione) {
+        this.dataCreazione = dataCreazione;
     }
 
     public String getTitolo() {
         return titolo;
     }
 
-    public void setTitolo(String titolo) {
+    public void setTitle(String titolo) {
         this.titolo = titolo;
     }
 
@@ -98,7 +90,7 @@ public class Ticket {
         return descrizione;
     }
 
-    public void setDescrizione(String descrizione) {
+    public void setDescription(String descrizione) {
         this.descrizione = descrizione;
     }
 
@@ -106,39 +98,15 @@ public class Ticket {
         return stato;
     }
 
-    public void setStato(TicketStato stato) {
+    public void setStatus(TicketStato stato) {
         this.stato = stato;
-    }
-
-    public LocalDate getDataCreazioneTicket() {
-        return dataCreazioneTicket;
-    }
-
-    public void setDataCreazioneTicket(LocalDate dataCreazioneTicket) {
-        this.dataCreazioneTicket = dataCreazioneTicket;
-    }
-
-    public LocalDate getDataModificaTicket() {
-        return dataModificaTicket;
-    }
-
-    public void setDataModificaTicket(LocalDate dataModificaTicket) {
-        this.dataModificaTicket = dataModificaTicket;
-    }
-
-    public Operatore getOperatore() {
-        return operatore;
-    }
-
-    public void setOperatore(Operatore operatore) {
-        this.operatore = operatore;
     }
 
     public Categoria getCategoria() {
         return categoria;
     }
 
-    public void setCategoria(Categoria categoria) {
+    public void setCategoria(Category categoria) {
         this.categoria = categoria;
     }
 
@@ -148,5 +116,13 @@ public class Ticket {
 
     public void setNotes(List<NoteTicket> notes) {
         this.notes = notes;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }
