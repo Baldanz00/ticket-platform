@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-DashboardGestioneTicketsApplication<dashboard-gestione-tickets>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "m4.gioia.dashboard_gestione_tickets.DashboardGestioneTicketsApplication",
+            "projectName": "dashboard-gestione-tickets",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
