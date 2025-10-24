@@ -40,9 +40,9 @@ public class UserApiController {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            model.addAttribute("userName", user.getNome());
-            model.addAttribute("userSurname", user.getCognome());
-            model.addAttribute("userStatus", user.getStato());
+            model.addAttribute("userName", user.getName());
+            model.addAttribute("userSurname", user.getSurname());
+            model.addAttribute("userStatus", user.getStatus());
             model.addAttribute("username", user.getUsername());
             model.addAttribute("userEmail", user.getEmail());
             model.addAttribute("canUpdateStatus", canUpdateStatus);

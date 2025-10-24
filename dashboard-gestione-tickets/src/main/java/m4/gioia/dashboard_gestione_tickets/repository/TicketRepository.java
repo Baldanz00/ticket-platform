@@ -1,6 +1,5 @@
 package m4.gioia.dashboard_gestione_tickets.repository;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 

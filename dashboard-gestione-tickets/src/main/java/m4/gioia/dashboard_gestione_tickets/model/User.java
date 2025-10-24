@@ -17,21 +17,29 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "users")
 public class User extends DataBase {
 
+    /*sono utenti già presenti in database, ognuno con propria mail e psw
+- può visualizzare la lista dei ticket a lui assegnati
+- può visualizzare il dettaglio di un ticket a lui assegnato
+- può aggiornare lo stato di un ticket a lui assegnato
+- puoi aggiungere una nota a un ticket a lui assegnato
+- può modificare i propri dati dalla sua pagina tra cui lo stato personale in “non attivo” solo se
+  non ha nemmeno un ticket in stato “da fare” o “in corso”
+* */
     public enum UserStatus {
         DISPONIBILE, NON_DISPONIBILE
     }
 
     @NotBlank
     @Column(nullable = false, length = 100)
-    private String nome;
+    private String name;
 
     @NotBlank
     @Column(nullable = false, length = 100)
-    private String cognome;
+    private String surname;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserStatus stato = UserStatus.DISPONIBILE;
+    private UserStatus status = UserStatus.DISPONIBILE;
 
     @NotBlank
     @Email
@@ -50,34 +58,31 @@ public class User extends DataBase {
     @ManyToMany(fetch = FetchType.EAGER)
     private List<Role> roles;
 
-    public String getNome() {
-        return nome;
+
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public void setName(String nome) {
-        this.nome = nome;
+    public String getSurname() {
+        return surname;
+    }
+    public void setSurname(String surname) {
+        this.surname = surname;
     }
 
-    public String getCognome() {
-        return cognome;
+    public UserStatus getStatus() {
+        return status;
     }
-
-    public void setSurname(String cognome) {
-        this.cognome = cognome;
-    }
-
-    public UserStatus getStato() {
-        return stato;
-    }
-
-    public void setStatus(UserStatus stato) {
-        this.stato = stato;
+    public void setStatus(UserStatus status) {
+        this.status = status;
     }
 
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         this.email = email;
     }
@@ -85,7 +90,6 @@ public class User extends DataBase {
     public String getUsername() {
         return username;
     }
-
     public void setUsername(String username) {
         this.username = username;
     }
@@ -93,7 +97,6 @@ public class User extends DataBase {
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
     }
@@ -101,7 +104,6 @@ public class User extends DataBase {
     public List<Role> getRoles() {
         return roles;
     }
-
     public void setRoles(List<Role> roles) {
         this.roles = roles;
     }

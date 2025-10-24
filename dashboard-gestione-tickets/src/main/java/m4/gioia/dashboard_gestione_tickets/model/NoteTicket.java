@@ -1,17 +1,14 @@
 package m4.gioia.dashboard_gestione_tickets.model;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "note_ticket")
@@ -33,12 +30,11 @@ public class NoteTicket extends DataBase {
     private String contenuto;
 
     @Column(nullable = false)
-    private Instant createdAt = Instant.now();
+    private LocalDate createdAt = LocalDate.now();
 
     public Ticket getTicket() {
         return ticket;
     }
-
     public void setTicket(Ticket ticket) {
         this.ticket = ticket;
     }
@@ -46,7 +42,6 @@ public class NoteTicket extends DataBase {
     public User getAutore() {
         return autore;
     }
-
     public void setAuthor(User autore) {
         this.autore = autore;
     }
@@ -54,16 +49,14 @@ public class NoteTicket extends DataBase {
     public String getContenuto() {
         return contenuto;
     }
-
-    public void setContent(String contenuto) {
+    public void setContenuto(String contenuto) {
         this.contenuto = contenuto;
     }
 
-    public Instant getCreatedAt() {
+    public LocalDate getCreatedAt() {
         return createdAt;
     }
-
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(LocalDate createdAt) {
         this.createdAt = createdAt;
     }
 }
