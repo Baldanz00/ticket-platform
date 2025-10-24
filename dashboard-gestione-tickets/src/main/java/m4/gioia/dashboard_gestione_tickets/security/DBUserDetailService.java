@@ -21,7 +21,7 @@ public class DBUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
-            return new DataBase(userOpt.get());//carico l'utente dal db
+            return new DBUserDetail(userOpt.get());//carico l'utente dal db
         } else {
             throw new UsernameNotFoundException("Username not found");
         }

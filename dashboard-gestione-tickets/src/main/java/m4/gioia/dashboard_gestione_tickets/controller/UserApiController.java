@@ -34,8 +34,8 @@ public class UserApiController {
         }
         String username = authentication.getName();
         boolean canUpdateStatus = ticketRepository
-                .findTicketByStatusAndUser_Username(Ticket.Status.DA_FARE, username).size()
-                + ticketRepository.findTicketByStatusAndUser_Username(Ticket.Status.IN_CORSO, username)
+                .findTicketByStatoAndUser_Username(Ticket.Status.DA_FARE, username).size()
+                + ticketRepository.findTicketByStatoAndUser_Username(Ticket.Status.IN_CORSO, username)
                         .size() == 0;
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {

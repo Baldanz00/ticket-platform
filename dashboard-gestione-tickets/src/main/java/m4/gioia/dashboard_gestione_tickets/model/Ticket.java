@@ -51,7 +51,7 @@ public class Ticket extends DataBase {
 
     @NotNull
     @Enumerated(EnumType.STRING) // salva nel db il nome dell'enum invece del suo valore
-    @Column(nullable = false)
+    @Column(nullable = false, name = "stato")
     private Status stato = Status.DA_FARE;
 
     @NotNull
@@ -72,7 +72,6 @@ public class Ticket extends DataBase {
     public LocalDate getDataCreazione() {
         return dataCreazione;
     }
-
     public void setCreationDate(LocalDate dataCreazione) {
         this.dataCreazione = dataCreazione;
     }
@@ -80,39 +79,34 @@ public class Ticket extends DataBase {
     public String getTitolo() {
         return titolo;
     }
-
-    public void setTitle(String titolo) {
+    public void setTitolo(String titolo) {
         this.titolo = titolo;
     }
 
     public String getDescrizione() {
         return descrizione;
     }
-
-    public void setDescription(String descrizione) {
+    public void setDescrizione(String descrizione) {
         this.descrizione = descrizione;
     }
 
     public Status getStato() {
         return stato;
     }
-
-    public void setStatus(Status stato) {
+    public void setStato(Status stato) {
         this.stato = stato;
     }
 
-    public Category getCategoria() {
+    public Category getCategory() {
         return category;
     }
-
-    public void setCategoria(Category category) {
+    public void setCategory(Category category) {
         this.category = category;
     }
 
     public List<NoteTicket> getNotes() {
         return notes;
     }
-
     public void setNotes(List<NoteTicket> notes) {
         this.notes = notes;
     }
@@ -120,7 +114,6 @@ public class Ticket extends DataBase {
     public User getUser() {
         return user;
     }
-
     public void setUser(User user) {
         this.user = user;
     }

@@ -1,6 +1,5 @@
 package m4.gioia.dashboard_gestione_tickets.security;
 
-import m4.gioia.dashboard_gestione_tickets.model.DataBase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
