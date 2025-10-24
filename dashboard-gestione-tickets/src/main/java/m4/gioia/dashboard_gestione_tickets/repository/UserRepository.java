@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 
 import m4.gioia.dashboard_gestione_tickets.model.User;
 
-public class UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 

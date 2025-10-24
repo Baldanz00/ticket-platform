@@ -92,12 +92,21 @@
 	</dependencies>
 
 	<build>
-		<plugins>
+	<plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>3.11.0</version>
+            <configuration>
+                <!-- usa release per compatibilità con il JDK -->
+                <release>${java.version}</release>
+            </configuration>
+        </plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-			</plugin>
-		</plugins>
+		</plugin>
+	</plugins>
 	</build>
 
 </project>

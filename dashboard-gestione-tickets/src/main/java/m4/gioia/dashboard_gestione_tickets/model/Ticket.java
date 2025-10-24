@@ -1,13 +1,11 @@
 package m4.gioia.dashboard_gestione_tickets.model;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale.Category;
+import java.util.Locale;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -33,7 +31,7 @@ public class Ticket extends DataBase {
      * 
      */
 
-    public enum TicketStato {
+    public enum Status {
 
         DA_FARE,
         IN_CORSO,
@@ -52,16 +50,17 @@ public class Ticket extends DataBase {
     private String descrizione;
 
     @NotNull
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING) // salva nel db il nome dell'enum invece del suo valore
     @Column(nullable = false)
-    private TicketStato stato = TicketStato.TO_DO;
+    private Status stato = Status.DA_FARE;
 
     @NotNull
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Category categoria;
+    private Category category;
 
-    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL, orphanRemoval = true) // se rimuovo una nota dal ticket,
+                                                                                     // la rimuovo anche dal db
     @OrderBy("createdAt ASC")
     private List<NoteTicket> notes = new ArrayList<>();
 
@@ -94,20 +93,20 @@ public class Ticket extends DataBase {
         this.descrizione = descrizione;
     }
 
-    public TicketStato getStato() {
+    public Status getStato() {
         return stato;
     }
 
-    public void setStatus(TicketStato stato) {
+    public void setStatus(Status stato) {
         this.stato = stato;
     }
 
-    public Categoria getCategoria() {
-        return categoria;
+    public Category getCategoria() {
+        return category;
     }
 
-    public void setCategoria(Category categoria) {
-        this.categoria = categoria;
+    public void setCategoria(Category category) {
+        this.category = category;
     }
 
     public List<NoteTicket> getNotes() {

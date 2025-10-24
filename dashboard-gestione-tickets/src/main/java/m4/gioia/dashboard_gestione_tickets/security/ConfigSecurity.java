@@ -1,10 +1,12 @@
 package m4.gioia.dashboard_gestione_tickets.security;
 
+import m4.gioia.dashboard_gestione_tickets.model.DataBase;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -29,8 +31,8 @@ public class ConfigSecurity {
     }
 
     @Bean
-    DatabaseUserDetailsService userDetailsService() {
-        return new DatabaseUserDetailsService();
+    DataBase userDetailsService() {
+        return new UserDetailsService();
     }
 
     @Bean

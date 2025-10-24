@@ -1,9 +1,9 @@
 package m4.gioia.dashboard_gestione_tickets.controller;
 
-import com.esercizio.milestone.ticket_platform.model.Ticket;
-import com.esercizio.milestone.ticket_platform.model.User;
-import com.esercizio.milestone.ticket_platform.repository.TicketRepository;
-import com.esercizio.milestone.ticket_platform.repository.UserRepository;
+import m4.gioia.dashboard_gestione_tickets.model.Ticket;
+import m4.gioia.dashboard_gestione_tickets.model.User;
+import m4.gioia.dashboard_gestione_tickets.repository.TicketRepository;
+import m4.gioia.dashboard_gestione_tickets.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -34,15 +34,15 @@ public class UserApiController {
         }
         String username = authentication.getName();
         boolean canUpdateStatus = ticketRepository
-                .findTicketByStatusAndUser_Username(Ticket.TicketStatus.TO_DO, username).size()
-                + ticketRepository.findTicketByStatusAndUser_Username(Ticket.TicketStatus.IN_PROGRESS, username)
+                .findTicketByStatusAndUser_Username(Ticket.Status.DA_FARE, username).size()
+                + ticketRepository.findTicketByStatusAndUser_Username(Ticket.Status.IN_CORSO, username)
                         .size() == 0;
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
             User user = userOpt.get();
-            model.addAttribute("userName", user.getName());
-            model.addAttribute("userSurname", user.getSurname());
-            model.addAttribute("userStatus", user.getStatus());
+            model.addAttribute("userName", user.getNome());
+            model.addAttribute("userSurname", user.getCognome());
+            model.addAttribute("userStatus", user.getStato());
             model.addAttribute("username", user.getUsername());
             model.addAttribute("userEmail", user.getEmail());
             model.addAttribute("canUpdateStatus", canUpdateStatus);
@@ -58,9 +58,9 @@ public class UserApiController {
             User user = userOpt.get();
 
             if (status.equals("Available")) {
-                user.setStatus(User.UserStatus.AVAILABLE);
+                user.setStatus(User.UserStatus.DISPONIBILE);
             } else if (status.equals("Inactive")) {
-                user.setStatus(User.UserStatus.NOT_AVAILABLE);
+                user.setStatus(User.UserStatus.NON_DISPONIBILE);
             }
 
             userRepository.save(user);

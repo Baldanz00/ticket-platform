@@ -2,13 +2,14 @@ package m4.gioia.dashboard_gestione_tickets.security;
 
 import java.util.Optional;
 
+import m4.gioia.dashboard_gestione_tickets.model.DataBase;
+import m4.gioia.dashboard_gestione_tickets.model.User;
+import m4.gioia.dashboard_gestione_tickets.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import m4.gioia.dashboard_gestione_tickets.repository.UserRepository;
 
 @Service
 public class DBUserDetailService implements UserDetailsService {
@@ -20,7 +21,7 @@ public class DBUserDetailService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
-            return new DatabaseUserDetails(userOpt.get());
+            return new DataBase(userOpt.get());
         } else {
             throw new UsernameNotFoundException("Username not found");
         }

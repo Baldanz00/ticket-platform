@@ -1,9 +1,15 @@
 package m4.gioia.dashboard_gestione_tickets.controller;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 
-import com.esercizio.milestone.ticket_platform.model.User;
+
+import m4.gioia.dashboard_gestione_tickets.model.Ticket;
+import m4.gioia.dashboard_gestione_tickets.model.User;
+import m4.gioia.dashboard_gestione_tickets.repository.CategoryRepository;
+import m4.gioia.dashboard_gestione_tickets.repository.TicketRepository;
+import m4.gioia.dashboard_gestione_tickets.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -14,17 +20,11 @@ import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.esercizio.milestone.ticket_platform.model.Ticket;
-import com.esercizio.milestone.ticket_platform.repository.CategoryRepository;
-import com.esercizio.milestone.ticket_platform.repository.TicketRepository;
-import com.esercizio.milestone.ticket_platform.repository.UserRepository;
-
 import jakarta.validation.Valid;
 
 @Controller
 @RequestMapping("")
 public class RestApiController {
-
     @Autowired
     private TicketRepository ticketRepository;
 
@@ -42,17 +42,17 @@ public class RestApiController {
         int totalTickets;
 
         if (getAuthorityFromAuthentication(authentication, "ADMIN")) {
-            totalTicketsCompleted = ticketRepository.findTicketByStatus(Ticket.TicketStatus.COMPLETED).size();
-            totalTicketsInProgress = ticketRepository.findTicketByStatus(Ticket.TicketStatus.IN_PROGRESS).size();
-            totalTicketsToDo = ticketRepository.findTicketByStatus(Ticket.TicketStatus.TO_DO).size();
+            totalTicketsCompleted = ticketRepository.findTicketByStatus(Ticket.Status.COMPLETATO).size();
+            totalTicketsInProgress = ticketRepository.findTicketByStatus(Ticket.Status.IN_CORSO).size();
+            totalTicketsToDo = ticketRepository.findTicketByStatus(Ticket.Status.DA_FARE).size();
         } else {
             totalTicketsCompleted = ticketRepository
-                    .findTicketByStatusAndUser_Username(Ticket.TicketStatus.COMPLETED, authentication.getName()).size();
+                    .findTicketByStatusAndUser_Username(Ticket.Status.COMPLETATO, authentication.getName()).size();
             totalTicketsInProgress = ticketRepository
-                    .findTicketByStatusAndUser_Username(Ticket.TicketStatus.IN_PROGRESS, authentication.getName())
+                    .findTicketByStatusAndUser_Username(Ticket.Status.IN_CORSO, authentication.getName())
                     .size();
             totalTicketsToDo = ticketRepository
-                    .findTicketByStatusAndUser_Username(Ticket.TicketStatus.TO_DO, authentication.getName()).size();
+                    .findTicketByStatusAndUser_Username(Ticket.Status.DA_FARE, authentication.getName()).size();
         }
         totalTickets = totalTicketsCompleted + totalTicketsInProgress + totalTicketsToDo;
 
@@ -80,7 +80,7 @@ public class RestApiController {
 
         if (keyword != null) {
             for (Ticket ticket : ticketToShow) {
-                if (!ticket.getTitle().contains(keyword)) {
+                if (!ticket.getTitolo().contains(keyword)) {
                     ticketToShow.remove(ticket);
                 }
             }
@@ -106,7 +106,7 @@ public class RestApiController {
         model.addAttribute("isOperator", getAuthorityFromAuthentication(authentication, "OPERATOR"));
         model.addAttribute("ticket", ticket);
         model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("statusNamesList", Ticket.TicketStatus.values());
+        model.addAttribute("statusNamesList", Ticket.Status.values());
         model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
 
         return "/tickets/editTicket";
@@ -118,7 +118,7 @@ public class RestApiController {
         Ticket oldTicket = ticketRepository.findById(formTicket.getId()).get();
         Optional<User> userOpt = userRepository.findByUsername(formTicket.getUser().getUsername());
 
-        formTicket.setCreationDate(oldTicket.getCreationDate());
+        formTicket.setCreationDate(oldTicket.getDataCreazione());
         System.out.println("user= " + formTicket.getUser());
 
         if (bindingResult.hasErrors()) {
@@ -126,7 +126,7 @@ public class RestApiController {
             model.addAttribute("isOperator", getAuthorityFromAuthentication(authentication, "OPERATOR"));
             model.addAttribute("ticket", oldTicket);
             model.addAttribute("categories", categoryRepository.findAll());
-            model.addAttribute("statusNamesList", Ticket.TicketStatus.values());
+            model.addAttribute("statusNamesList", Ticket.Status.values());
             model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
             return "/tickets/editTicket";
         }
@@ -141,9 +141,9 @@ public class RestApiController {
             userFound = oldTicket.getUser();
         }
 
-        if (formTicket.getStatus().equals(Ticket.TicketStatus.TO_DO)
-                || formTicket.getStatus().equals(Ticket.TicketStatus.IN_PROGRESS)) {
-            userFound.setStatus(User.UserStatus.AVAILABLE);
+        if (formTicket.getStato().equals(Ticket.Status.DA_FARE)
+                || formTicket.getStato().equals(Ticket.Status.IN_CORSO)) {
+            userFound.setStatus(User.UserStatus.DISPONIBILE);
             userRepository.save(userFound);
         }
 
@@ -153,7 +153,7 @@ public class RestApiController {
     @GetMapping("/tickets/create")
     public String getTicketsForm(Model model) {
         model.addAttribute("categories", categoryRepository.findAll());
-        model.addAttribute("statusNamesList", Ticket.TicketStatus.values());
+        model.addAttribute("statusNamesList", Ticket.Status.values());
         model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
         model.addAttribute("ticket", new Ticket());
         return "tickets/ticketsForm";
@@ -162,7 +162,7 @@ public class RestApiController {
     @PostMapping("/tickets/create")
     public String createTicket(@Valid @ModelAttribute("ticket") Ticket formTicket, BindingResult bindingResult,
             RedirectAttributes redirectAttributes, Model model, Authentication authentication) {
-        Optional<Ticket> optTicket = ticketRepository.findByTitle(formTicket.getTitle());
+        Optional<Ticket> optTicket = ticketRepository.findByTitle(formTicket.getTitolo());
         Optional<User> userOpt = userRepository.findByUsername(formTicket.getUser().getUsername());
         if (optTicket.isPresent()) {
             bindingResult.addError(new ObjectError("title", "There's already a ticket for this problem!"));
@@ -170,18 +170,18 @@ public class RestApiController {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryRepository.findAll());
-            model.addAttribute("statusNamesList", Ticket.TicketStatus.values());
+            model.addAttribute("statusNamesList", Ticket.Status.values());
             model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
             return "tickets/ticketsForm";
         }
 
-        formTicket.setCreationDate(Instant.now());
+        formTicket.setCreationDate(LocalDate.now());
         ticketRepository.save(formTicket);
         if (userOpt.isPresent()) {
             User userFound = userOpt.get();
-            if (formTicket.getStatus().equals(Ticket.TicketStatus.TO_DO)
-                    || formTicket.getStatus().equals(Ticket.TicketStatus.IN_PROGRESS)) {
-                userFound.setStatus(User.UserStatus.AVAILABLE);
+            if (formTicket.getStato().equals(Ticket.Status.DA_FARE)
+                    || formTicket.getStato().equals(Ticket.Status.IN_CORSO)) {
+                userFound.setStatus(User.UserStatus.DISPONIBILE);
                 userRepository.save(userFound);
             }
         }

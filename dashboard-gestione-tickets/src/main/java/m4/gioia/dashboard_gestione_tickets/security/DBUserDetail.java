@@ -4,14 +4,10 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import m4.gioia.dashboard_gestione_tickets.model.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
-import com.esercizio.milestone.ticket_platform.model.Role;
-import com.esercizio.milestone.ticket_platform.model.User;
-
-import m4.gioia.dashboard_gestione_tickets.model.User;
 
 public class DBUserDetail implements UserDetails {
 
@@ -21,7 +17,7 @@ public class DBUserDetail implements UserDetails {
 
     private Set<GrantedAuthority> authorities;
 
-    public DBUserDetail(User user) {
+    public DBUserDetail(m4.gioia.dashboard_gestione_tickets.model.User user) {
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.authorities = new HashSet<>();
