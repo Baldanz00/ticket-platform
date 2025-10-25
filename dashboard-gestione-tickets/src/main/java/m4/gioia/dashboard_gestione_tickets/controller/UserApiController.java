@@ -33,13 +33,14 @@ public class UserApiController {
             return "redirect:/login";
         }
         String username = authentication.getName();
-        boolean canUpdateStatus = ticketRepository
-                .findTicketByStatoAndUser_Username(Ticket.Status.DA_FARE, username).size()
-                + ticketRepository.findTicketByStatoAndUser_Username(Ticket.Status.IN_CORSO, username)
-                        .size() == 0;
+        boolean canUpdateStatus = ticketRepository.findTicketByStatoAndUser_Username(Ticket.Status.DA_FARE, username).size()
+                                + ticketRepository.findTicketByStatoAndUser_Username(Ticket.Status.IN_CORSO, username).size() == 0;
+
         Optional<User> userOpt = userRepository.findByUsername(username);
+
         if (userOpt.isPresent()) {
             User user = userOpt.get();
+
             model.addAttribute("userName", user.getName());
             model.addAttribute("userSurname", user.getSurname());
             model.addAttribute("userStatus", user.getStatus());
@@ -49,7 +50,7 @@ public class UserApiController {
         }
         return "/user/profile";
     }
-
+// l'operatore può cambiare il suo stato da DSIPONIBILE a NON DISPONIBILE
     @PostMapping("/profile/update-status")
     public String updateStatus(@RequestParam("status") String status, Authentication authentication,
             RedirectAttributes redirectAttributes) {
@@ -57,9 +58,9 @@ public class UserApiController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
 
-            if (status.equals("Available")) {
+            if (status.equals("Disponibile")) {
                 user.setStatus(User.UserStatus.DISPONIBILE);
-            } else if (status.equals("Inactive")) {
+            } else if (status.equals("Nod_Disponibile")) {
                 user.setStatus(User.UserStatus.NON_DISPONIBILE);
             }
 
