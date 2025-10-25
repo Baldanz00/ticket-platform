@@ -9,7 +9,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-
 @Configuration
 public class ConfigSecurity {
 
@@ -23,30 +22,39 @@ public class ConfigSecurity {
                 .requestMatchers("/tickets/edit/**").hasAnyAuthority("OPERATOR", "ADMIN")
                 .requestMatchers("/tickets", "/tickets/**").hasAnyAuthority("OPERATOR", "ADMIN")
                 .requestMatchers("/**").permitAll()
-                .and().formLogin()
-                .and().logout()
-                .and().csrf().disable();
+                .and()
+                .formLogin()
+                //.loginPage("/login")       // opzionale, ma consigliato
+                .permitAll()
+                .and()
+                .logout()
+                .permitAll()
+                .and()
+                .csrf().disable();
+
+        // ✅ questa riga è ESSENZIALE
+        http.authenticationProvider(authenticationProvider());
+
         return http.build();
     }
 
     @Bean
-    DBUserDetailService DBUserDetailService() {
+    DBUserDetailService userDetailService() {
         return new DBUserDetailService();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    PasswordEncoder passwordEncoder() {
+        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+        System.out.println(">>> PasswordEncoder bean creato: " + encoder.getClass().getName());
+        return encoder;
     }
-    //codifica della pw
 
     @Bean
     DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
-        authProvider.setUserDetailsService(DBUserDetailService());
+        authProvider.setUserDetailsService(userDetailService());
         authProvider.setPasswordEncoder(passwordEncoder());
-
         return authProvider;
     }
 }

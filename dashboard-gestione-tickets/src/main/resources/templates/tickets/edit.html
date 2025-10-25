@@ -25,41 +25,28 @@
 
 
         <form id="ticket-form" th:object="${ticket}" th:action="@{/tickets/edit/{id}(id=${ticket.id})}" method="post">
-            <ul th:if="${#fields.hasErrors('*')}">
-                <li th:each="err : ${#fields.errors('*')}" th:text="${err}">Input is incorrect</li>
-            </ul>
+            <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger" role="alert">
+                <strong>Validation Errors:</strong>
+                <ul class="mb-0">
+                    <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                </ul>
+            </div>
             <div class="row">
                 <div class="col-8">
                     <div class="row gy-2">
                         <div class="col-12">
                             <label class="form-label fw-semibold" for="title">Title</label>
                             <input id="title" type="text" class="form-control" th:field="*{title}" th:errorClass="is-invalid" placeholder="Insert Ticket's title" th:attr="readonly=${!isAdmin}">
-                            <div th:if="${#fields.hasErrors('title')}" class="invalid-feedback">
-                                <ul class="mb-0">
-                                    <li th:each="err : ${#fields.errors('title')}" th:text="${err}"></li>
-                                </ul>
-                            </div>
                         </div>
                         <div class="col-12">
                             <label class="form-label fw-semibold" for="description">Description</label>
                             <textarea id="description" class="form-control" th:field="*{description}" th:errorClass="is-invalid" rows="5" placeholder="Describe the problem" th:attr="readonly=${!isAdmin}"></textarea>
-                            <div th:if="${#fields.hasErrors('description')}" class="invalid-feedback">
-                                <ul class="mb-0">
-                                    <li th:each="err : ${#fields.errors('description')}" th:text="${err}"></li>
-                                </ul>
-                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold" for="status">Status</label>
                             <select id="status" class="form-select" th:field="*{status}" th:errorClass="is-invalid" th:attr="disabled=${!(isAdmin or isOperator)}">
                                 <option th:each="item : ${statusNamesList}" th:value="${item}" th:text="${item}"></option>
                             </select>
-                            <div th:if="${#fields.hasErrors('status')}" class="invalid-feedback">
-                                <ul class="mb-0">
-                                    <li th:each="err : ${#fields.errors('status')}" th:text="${err}"></li>
-                                </ul>
-                            </div>
-
                             <input type="hidden" th:if="${!(isAdmin or isOperator)}" th:field="*{status}" />
                         </div>
 
@@ -69,13 +56,7 @@
                                 <option value="">Select a category</option>
                                 <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
                             </select>
-                            <div th:if="${#fields.hasErrors('category')}" class="invalid-feedback">
-                                <ul class="mb-0">
-                                    <li th:each="err : ${#fields.errors('category')}" th:text="${err}"></li>
-                                </ul>
-                            </div>
-
-                            <input type="hidden" th:if="${!isAdmin}" th:field="*{category.id}" />
+                            <input type="hidden" th:if="${!isAdmin}" th:field="*{category.id}" /> <!-- nel caso in cui sia disabilitata la select-->
                         </div>
 
                         <div class="col-md-12">
@@ -84,13 +65,7 @@
                                 <option value="">Select an Operator</option>
                                 <option th:each="operator : ${operators}" th:value="${operator.id}" th:text="${operator.username}"></option>
                             </select>
-                            <div th:if="${#fields.hasErrors('user')}" class="invalid-feedback">
-                                <ul class="mb-0">
-                                    <li th:each="err : ${#fields.errors('user')}" th:text="${err}"></li>
-                                </ul>
-                            </div>
-
-                            <input type="hidden" th:if="${!isAdmin}" th:field="*{user.id}" />
+                            <input type="hidden" th:if="${!isAdmin}" th:field="*{user.id}" /><!-- nel caso in cui sia disabilitata la select-->
                         </div>
 
                         <div class="col-12 mt-4">

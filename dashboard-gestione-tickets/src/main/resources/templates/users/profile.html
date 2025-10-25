@@ -31,6 +31,7 @@
         <div class="row align-items-center">
             <div class="col-md-10">
                 <h1 class="display-4 fw-bold mb-2" th:text="${userName + ' ' + userSurname}"></h1>
+                <p class="lead mb-0 opacity-75" th:text="'Role(s): ' + ${userRoles}"></p>
             </div>
         </div>
     </div>
