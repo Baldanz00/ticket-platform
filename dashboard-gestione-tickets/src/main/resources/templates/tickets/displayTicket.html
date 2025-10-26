@@ -29,9 +29,9 @@
             height: 100%;
         }
 
-        h4, h5 {
-            color: #00ff00;
-            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
+        h3, h5, h6 {
+            color: #ffffff; /* bianco puro */
+            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00; /* alone verde Matrix */
         }
 
         .card {
@@ -114,15 +114,14 @@
                     </div>
                 </div>
             </div>
-
             <!-- Tickets Table -->
             <div class="card shadow-sm" th:if="${ticketList.size() > 0}">
-                <div class="card-header">
+                <div class="card-header bg-dark text-white">
                     <h5>All Tickets (<span th:text="${ticketList.size()}"></span>)</h5>
                 </div>
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
+                    <table class="table table-hover mb-0 text-white">
+                        <thead class="bg-dark text-white">
                         <tr>
                             <th>Title</th>
                             <th>Description</th>
@@ -135,29 +134,52 @@
                         </thead>
                         <tbody>
                         <tr th:each="item : ${ticketList}">
-                            <td><strong th:text="${item.titolo}"></strong></td>
-                            <td><span th:text="${item.description}"></span></td>
+                            <!-- Titolo -->
+                            <td><strong th:text="${item.titolo != null} ? ${item.titolo} : 'N/A'"></strong></td>
+
+                            <!-- Descrizione -->
+                            <td><span th:text="${item.description != null} ? ${item.description} : 'No description'"></span></td>
+
+                            <!-- Status con badge -->
                             <td>
-                                <span th:if="${item.status.name() == 'TO_DO'}" class="badge bg-danger">TO DO</span>
-                                <span th:if="${item.status.name() == 'IN_CORSO'}" class="badge bg-warning text-dark">IN PROGRESS</span>
-                                <span th:if="${item.status.name() == 'COMPLETED'}" class="badge bg-success">COMPLETED</span>
+                                <span th:if="${item.status != null and item.status.name() == 'TO_DO'}" class="badge bg-danger text-white">DA FARE</span>
+                                <span th:if="${item.status != null and item.status.name() == 'IN_CORSO'}" class="badge bg-warning text-dark">IN CORSO</span>
+                                <span th:if="${item.status != null and item.status.name() == 'COMPLETED'}" class="badge bg-success text-white">COMPLETATO</span>
+                                <span th:if="${item.status == null}" class="badge bg-secondary text-white">UNKNOWN</span>
                             </td>
-                            <td><span th:text="${item.category.name}"></span></td>
-                            <td><span th:text="${item.user.username}"></span></td>
-                            <td><small th:text="${#temporals.format(item.dataCreazione, 'dd/MM/yyyy HH:mm')}"></small></td>
+
+                            <!-- Categoria -->
+                            <td><span th:text="${item.category != null} ? ${item.category.name} : 'N/A'"></span></td>
+
+                            <!-- Operatore -->
+                            <td><span th:text="${item.user != null} ? ${item.user.username} : 'Unassigned'"></span></td>
+
+                            <!-- Data di creazione -->
+                            <td>
+                                <small th:text="${item.dataCreazione != null} ? ${#temporals.format(item.dataCreazione, 'dd/MM/yyyy HH:mm')} : 'N/A'"></small>
+                            </td>
+
+                            <!-- Azioni -->
                             <td class="text-center">
-                                <a th:href="@{/tickets/{id}(id=${item.id})}" class="btn btn-sm btn-outline-primary">View</a>
-                                <a th:href="@{/tickets/edit/{id}(id=${item.id})}" class="btn btn-sm btn-outline-warning">Edit</a>
-                                <a th:href="@{/tickets/delete/{id}(id=${item.id})}" class="btn btn-sm btn-outline-danger"
-                                   sec:authorize="hasAuthority('ADMIN')"
-                                   onclick="return confirm('Are you sure you want to delete this ticket?')">Delete</a>
+                                <a th:if="${item.id != null}" th:href="@{/tickets/{id}(id=${item.id})}"
+                                   class="btn btn-sm btn-outline-primary text-white">View</a>
+
+                                <a th:if="${item.id != null}" th:href="@{/tickets/edit/{id}(id=${item.id})}"
+                                   class="btn btn-sm btn-outline-warning text-white">Edit</a>
+
+                                <form th:if="${item.id != null}" th:action="@{/tickets/delete/{id}(id=${item.id})}" method="post"
+                                      style="display:inline;" sec:authorize="hasAuthority('ADMIN')">
+                                    <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />                                    <button type="submit" class="btn btn-sm btn-outline-danger text-white"
+                                            onclick="return confirm('Are you sure you want to delete this ticket?')">
+                                        Delete
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
-
             <!-- Empty State -->
             <div class="card shadow-sm text-center py-5" th:unless="${ticketList.size() > 0}">
                 <div class="card-body">

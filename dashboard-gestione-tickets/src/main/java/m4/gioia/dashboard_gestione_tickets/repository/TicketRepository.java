@@ -3,6 +3,7 @@ package m4.gioia.dashboard_gestione_tickets.repository;
 import java.util.List;
 import java.util.Optional;
 
+import m4.gioia.dashboard_gestione_tickets.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import m4.gioia.dashboard_gestione_tickets.model.Ticket;
@@ -17,4 +18,6 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     List<Ticket> findByUser_Username(String username);
 
     List<Ticket> findTicketByStatusAndUser_Username(Ticket.Status ticketStatus, String username);
+
+    List<Ticket> findByUserIdAndStatusIn(Long userId, List<Ticket.Status> statuses);
 }

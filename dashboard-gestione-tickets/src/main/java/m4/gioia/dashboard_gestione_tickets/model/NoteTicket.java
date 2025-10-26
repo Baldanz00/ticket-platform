@@ -42,7 +42,7 @@ public class NoteTicket extends DataBase {
     public User getAutore() {
         return autore;
     }
-    public void setAuthor(User autore) {
+    public void setAutore(User autore) {
         this.autore = autore;
     }
 

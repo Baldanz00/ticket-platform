@@ -146,12 +146,12 @@
                         <div class="bg-dark rounded p-3 mb-3" style="border:1px solid #00ff00;">
                             <label class="form-label fw-bold mb-2">Current Status</label>
                             <select th:if="${canUpdateStatus}" name="status" class="form-select form-select-lg">
-                                <option value="Inactive" th:selected="${userStatus.name() == 'NOT_AVAILABLE'}">Inactive</option>
-                                <option value="Available" th:selected="${userStatus.name() == 'AVAILABLE'}">Available</option>
+                                <option value="Inactive" th:selected="${userStatus.name() == 'INACTIVE'}">Inactive</option>
+                                <option value="Available" th:selected="${userStatus.name() == 'ACTIVE'}">Active</option>
                             </select>
                             <select th:unless="${canUpdateStatus}" name="status" class="form-select form-select-lg" disabled>
-                                <option value="Inactive" th:selected="${userStatus.name() == 'NOT_AVAILABLE'}">Inactive</option>
-                                <option value="Available" th:selected="${userStatus.name() == 'AVAILABLE'}">Available</option>
+                                <option value="Inactive" th:selected="${userStatus.name() == 'INACTIVE'}">Inactive</option>
+                                <option value="Available" th:selected="${userStatus.name() == 'ACTIVE'}">Active</option>
                             </select>
                         </div>
                         <button th:if="${canUpdateStatus}" type="submit" class="btn btn-primary w-100 btn-lg">

@@ -15,9 +15,10 @@
     <title th:if="${empty}">Ticket not found</title>
 
     <style>
+        /* --- MATRIX STYLE CON TESTO PIÙ LEGGIBILE --- */
         body {
             background-color: #0a0a0a;
-            color: #00ff00;
+            color: #e0ffe0; /* verde chiaro quasi bianco */
             font-family: 'Share Tech Mono', monospace;
             overflow-x: hidden;
         }
@@ -32,14 +33,22 @@
         }
 
         h3, h5, h6 {
-            color: #00ff00;
-            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
+        color: #ffffff; /* bianco puro */
+        text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00; /* alone verde Matrix */
+    }
+
+        p, .text-muted {
+            color: #f1f1f1 !important; /* bianco sporco */
+        }
+
+        span.text-muted, small.text-muted {
+            color: #b8ffb8 !important; /* verde tenue leggibile */
         }
 
         .card {
             background-color: rgba(0, 0, 0, 0.8);
-            border: 1px solid #00ff00;
-            color: #00ff00;
+            border: 1px solid rgba(0, 255, 0, 0.6);
+            color: #e8ffe8;
         }
 
         .card-header {
@@ -68,14 +77,15 @@
             box-shadow: 0 0 15px #00ff00;
         }
 
-        .text-muted {
-            color: #00ff00 !important;
-        }
-
         textarea.form-control {
             background-color: #0a0a0a;
-            color: #00ff00;
+            color: #e8ffe8;
             border: 1px solid #00ff00;
+        }
+
+        textarea.form-control::placeholder {
+            color: #99ff99;
+            opacity: 0.6;
         }
 
         hr {
@@ -139,7 +149,7 @@
 
                                     <form action="#" th:action="@{/tickets/{id}/notes/add(id=*{id})}" method="post" class="mb-3">
                                         <div class="mb-2">
-                                            <textarea name="content" class="form-control form-control-sm" rows="3" placeholder="Add a note..." required></textarea>
+                                            <textarea name="note" class="form-control form-control-sm" rows="3" placeholder="Add a note..." required></textarea>
                                         </div>
                                         <button type="submit" class="btn btn-primary btn-sm w-100">Add Note</button>
                                     </form>

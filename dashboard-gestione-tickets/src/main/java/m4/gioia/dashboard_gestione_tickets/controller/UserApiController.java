@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,23 +57,42 @@ public class UserApiController {
         }
         return "/users/profile";
     }
-// l'operatore può cambiare il suo stato da DSIPONIBILE a NON DISPONIBILE
+
     @PostMapping("/profile/update-status")
-    public String updateStatus(@RequestParam("status") String status, Authentication authentication,
-            RedirectAttributes redirectAttributes) {
+    public String updateStatus(@RequestParam("status") String status,
+                               Authentication authentication,
+                               RedirectAttributes redirectAttributes) {
+
         Optional<User> userOpt = userRepository.findByUsername(authentication.getName());
         if (userOpt.isPresent()) {
             User user = userOpt.get();
 
-            if (status.equals("ACTIVE")) {
-                user.setStatus(User.UserStatus.ACTIVE);
-            } else if (status.equals("INACTIVE")) {
+            // Controlla se l'utente vuole diventare NON DISPONIBILE / INACTIVE
+            if (status.equalsIgnoreCase("INACTIVE")) {
+
+                // Recupera ticket attivi
+                List<Ticket> activeTickets = ticketRepository.findByUserIdAndStatusIn(
+                        user.getId(),
+                        Arrays.asList(Ticket.Status.DA_FARE, Ticket.Status.IN_CORSO)
+                );
+
+                if (!activeTickets.isEmpty()) {
+                    // Non permettere l'aggiornamento
+                    redirectAttributes.addFlashAttribute("errorMessage",
+                            "Cannot set status to NON DISPONIBILE: you have active tickets!");
+                    return "redirect:/user/profile";
+                }
+
                 user.setStatus(User.UserStatus.INACTIVE);
+
+            } else if (status.equalsIgnoreCase("ACTIVE") || status.equalsIgnoreCase("AVAILABLE")) {
+                user.setStatus(User.UserStatus.ACTIVE); // o AVAILABLE se hai questo enum
             }
 
             userRepository.save(user);
+            redirectAttributes.addFlashAttribute("successMessage", "Status updated to " + status + "!");
         }
-        redirectAttributes.addFlashAttribute("successMessage", "Status updated in " + status + "!");
+
         return "redirect:/user/profile";
     }
 }

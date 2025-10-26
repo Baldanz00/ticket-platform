@@ -36,8 +36,8 @@
 
         /* Titles */
         h1.display-3, h2, h3.display-4 {
-            color: #00ff00;
-            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00;
+            color: #ffffff; /* bianco puro */
+            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00; /* alone verde Matrix */
         }
 
         /* Flicker animation */
@@ -87,9 +87,17 @@
             padding: 20px;
             transition: transform 0.3s, box-shadow 0.3s;
         }
+
         .stat-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 0 15px #00ff00;
+        }
+
+        /* Testo bianco dentro le card */
+        .stat-card h3,
+        .stat-card p {
+            color: #ffffff !important; /* bianco puro */
+            text-shadow: none;
         }
     </style>
 </head>
