@@ -19,10 +19,18 @@ public class DBUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        System.out.println("=== LOGIN DEBUG ===");
+        System.out.println("Username ricercato: " + username);
+
         Optional<User> userOpt = userRepository.findByUsername(username);
         if (userOpt.isPresent()) {
-            return new DBUserDetail(userOpt.get());//carico l'utente dal db
+            User user = userOpt.get();
+            System.out.println("Utente trovato!");
+            System.out.println("Password dal DB: " + user.getPassword());
+            System.out.println("Ruoli: " + user.getRoles());
+            return new DBUserDetail(user);
         } else {
+            System.out.println("Utente NON trovato!");
             throw new UsernameNotFoundException("Username not found");
         }
     }

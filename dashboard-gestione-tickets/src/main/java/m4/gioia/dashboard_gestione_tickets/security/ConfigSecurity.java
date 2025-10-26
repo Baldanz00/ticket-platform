@@ -7,8 +7,10 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+
 @Configuration
 public class ConfigSecurity {
 
@@ -23,16 +25,13 @@ public class ConfigSecurity {
                 .requestMatchers("/tickets", "/tickets/**").hasAnyAuthority("OPERATOR", "ADMIN")
                 .requestMatchers("/**").permitAll()
                 .and()
-                .formLogin()
-                //.loginPage("/login")       // opzionale, ma consigliato
-                .permitAll()
-                .and()
-                .logout()
-                .permitAll()
-                .and()
-                .csrf().disable();
+                .formLogin(form -> form
+                        .defaultSuccessUrl("/tickets", true)
+                        .permitAll()
+                )
+                .logout(logout -> logout.permitAll())
+                .csrf(csrf -> csrf.disable());
 
-        // ✅ questa riga è ESSENZIALE
         http.authenticationProvider(authenticationProvider());
 
         return http.build();
@@ -43,11 +42,10 @@ public class ConfigSecurity {
         return new DBUserDetailService();
     }
 
+    // Password in chiaro (NoOp)
     @Bean
-    PasswordEncoder passwordEncoder() {
-        PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        System.out.println(">>> PasswordEncoder bean creato: " + encoder.getClass().getName());
-        return encoder;
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean

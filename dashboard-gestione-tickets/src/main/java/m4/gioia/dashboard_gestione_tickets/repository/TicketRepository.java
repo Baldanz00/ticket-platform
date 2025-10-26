@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import m4.gioia.dashboard_gestione_tickets.model.Ticket;
 
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-    public List<Ticket> findTicketByStato(Ticket.Status ticketStato);
+    public List<Ticket> findTicketByStatus(Ticket.Status ticketStatus);
 
     public List<Ticket> findByTitoloContainingIgnoreCase(String keyword);
 
@@ -16,5 +16,5 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
 
     List<Ticket> findByUser_Username(String username);
 
-    List<Ticket> findTicketByStatoAndUser_Username(Ticket.Status ticketStato, String username);
+    List<Ticket> findTicketByStatusAndUser_Username(Ticket.Status ticketStatus, String username);
 }

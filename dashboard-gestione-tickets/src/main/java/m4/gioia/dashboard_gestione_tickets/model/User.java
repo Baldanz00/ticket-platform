@@ -26,7 +26,7 @@ public class User extends DataBase {
   non ha nemmeno un ticket in stato “da fare” o “in corso”
 * */
     public enum UserStatus {
-        DISPONIBILE, NON_DISPONIBILE
+        ACTIVE, INACTIVE
     }
 
     @NotBlank
@@ -39,7 +39,7 @@ public class User extends DataBase {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private UserStatus status = UserStatus.DISPONIBILE;
+    private UserStatus status = UserStatus.ACTIVE;
 
     @NotBlank
     @Email

@@ -23,10 +23,16 @@ public class DBUserDetail implements UserDetails {
         this.password = user.getPassword();
         this.authorities = new HashSet<>();
 
+        System.out.println("=== CARICAMENTO RUOLI PER: " + user.getUsername() + " ===");
+        System.out.println("Numero ruoli trovati: " + user.getRoles().size());
+
         for (Role role : user.getRoles()) {
+            System.out.println("Ruolo dal DB: '" + role.getName() + "'");
             SimpleGrantedAuthority sGA = new SimpleGrantedAuthority(role.getName());
             this.authorities.add(sGA);
         }
+
+        System.out.println("Authorities finali: " + this.authorities);
     }
 
     @Override

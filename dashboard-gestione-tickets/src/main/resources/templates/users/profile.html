@@ -2,36 +2,96 @@
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
 
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap CSS -->
     <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"/>
-
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/application.css}">
     <title>Profile</title>
+
+    <style>
+        body {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        #matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            width: 100%;
+            height: 100%;
+        }
+
+        h1, h4, h5, .lead, label {
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
+        }
+
+        .card {
+            background-color: rgba(0,0,0,0.85);
+            border: 1px solid #00ff00;
+        }
+
+        .btn-primary, .btn-outline-info {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover, .btn-outline-info:hover {
+            background-color: #00ff00;
+            color: #0a0a0a;
+            box-shadow: 0 0 15px #00ff00;
+        }
+
+        .form-select {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            border: 1px solid #00ff00;
+        }
+
+        .form-select:focus {
+            box-shadow: 0 0 10px #00ff00;
+            border-color: #00ff00;
+        }
+
+        .text-muted {
+            color: #00ff00 !important;
+        }
+
+        .alert-success {
+            background-color: rgba(0,255,0,0.1);
+            border-color: #00ff00;
+            color: #00ff00;
+        }
+
+        hr {
+            border-color: #00ff00;
+        }
+    </style>
 </head>
 
 <body>
+<canvas id="matrix"></canvas>
+
 <nav th:replace="~{navbar :: navbar('Profile')}"></nav>
 
 <div class="container py-5">
     <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
-             class="bi bi-check-circle-fill me-2" viewBox="0 0 16 16" style="vertical-align: middle;">
-            <path
-                    d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0m-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
-        </svg>
         <span th:text="${successMessage}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
-    <div class="bg-primary text-white rounded shadow p-5 mb-4">
+    <div class="bg-dark text-green rounded shadow p-5 mb-4" style="border:1px solid #00ff00;">
         <div class="row align-items-center">
             <div class="col-md-10">
                 <h1 class="display-4 fw-bold mb-2" th:text="${userName + ' ' + userSurname}"></h1>
-                <p class="lead mb-0 opacity-75" th:text="'Role(s): ' + ${userRoles}"></p>
+                <p class="lead mb-0 opacity-75" th:text="${#strings.listJoin(userRoles, ', ')}"></p>
             </div>
         </div>
     </div>
@@ -39,20 +99,20 @@
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-bottom">
+                <div class="card-header bg-dark border-bottom">
                     <h4 class="mb-0">Personal Information</h4>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-4">
                         <div class="col-md-6">
-                            <div class="border-start border-primary border-4 ps-3">
+                            <div class="border-start border-success border-4 ps-3">
                                 <small class="text-muted text-uppercase d-block mb-1">First Name</small>
                                 <h5 class="mb-0" th:text="${userName}"></h5>
                             </div>
                         </div>
 
                         <div class="col-md-6">
-                            <div class="border-start border-primary border-4 ps-3">
+                            <div class="border-start border-success border-4 ps-3">
                                 <small class="text-muted text-uppercase d-block mb-1">Last Name</small>
                                 <h5 class="mb-0" th:text="${userSurname}"></h5>
                             </div>
@@ -76,15 +136,14 @@
             </div>
         </div>
 
-
         <div class="col-lg-4">
             <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-white border-bottom">
+                <div class="card-header bg-dark border-bottom">
                     <h5 class="mb-0">Update Status</h5>
                 </div>
                 <div class="card-body p-4">
                     <form th:action="@{/user/profile/update-status}" method="post">
-                        <div class="bg-light rounded p-3 mb-3">
+                        <div class="bg-dark rounded p-3 mb-3" style="border:1px solid #00ff00;">
                             <label class="form-label fw-bold mb-2">Current Status</label>
                             <select th:if="${canUpdateStatus}" name="status" class="form-select form-select-lg">
                                 <option value="Inactive" th:selected="${userStatus.name() == 'NOT_AVAILABLE'}">Inactive</option>
@@ -106,14 +165,12 @@
             </div>
 
             <div class="card shadow-sm border-0">
-                <div class="card-header bg-white border-bottom">
+                <div class="card-header bg-dark border-bottom">
                     <h5 class="mb-0">Quick Actions</h5>
                 </div>
                 <div class="card-body p-4">
                     <div class="d-grid gap-2">
-                        <a href="/tickets" class="btn btn-outline-info btn-lg">
-                            My Tickets
-                        </a>
+                        <a href="/tickets" class="btn btn-outline-info btn-lg">My Tickets</a>
                     </div>
                 </div>
             </div>
@@ -121,8 +178,39 @@
     </div>
 </div>
 
-<!-- Bootstrap Bundle with Popper -->
 <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.bundle.min.js}"></script>
-</body>
 
+<script>
+    // Matrix background effect
+    const c = document.getElementById("matrix");
+    const ctx = c.getContext("2d");
+    c.height = window.innerHeight;
+    c.width = window.innerWidth;
+
+    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
+    const fontSize = 16;
+    const columns = c.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function draw() {
+        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.fillStyle = "#0F0";
+        ctx.font = fontSize + "px monospace";
+        for (let i = 0; i < drops.length; i++) {
+            const text = letters.charAt(Math.floor(Math.random() * letters.length));
+            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+            if (drops[i] * fontSize > c.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    setInterval(draw, 35);
+
+    window.addEventListener('resize', () => {
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+    });
+</script>
+
+</body>
 </html>

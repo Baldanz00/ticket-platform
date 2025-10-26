@@ -53,15 +53,15 @@ public class RestApiController {
         int totalTickets = 0;
 
         if (hasAuthority(authentication, "ADMIN")) {
-            totalTicketsCompletati = ticketRepository.findTicketByStato(Ticket.Status.COMPLETATO).size();
-            totalTicketsInCorso = ticketRepository.findTicketByStato(Ticket.Status.IN_CORSO).size();
-            totalTicketsDaFare = ticketRepository.findTicketByStato(Ticket.Status.DA_FARE).size();
+            totalTicketsCompletati = ticketRepository.findTicketByStatus(Ticket.Status.COMPLETATO).size();
+            totalTicketsInCorso = ticketRepository.findTicketByStatus(Ticket.Status.IN_CORSO).size();
+            totalTicketsDaFare = ticketRepository.findTicketByStatus(Ticket.Status.DA_FARE).size();
         } else if (authentication != null) {
             // Utente  non admin
             String username = authentication.getName();
-            totalTicketsCompletati = ticketRepository.findTicketByStatoAndUser_Username(Ticket.Status.COMPLETATO, username).size();
-            totalTicketsInCorso = ticketRepository.findTicketByStatoAndUser_Username(Ticket.Status.IN_CORSO, username).size();
-            totalTicketsDaFare = ticketRepository.findTicketByStatoAndUser_Username(Ticket.Status.DA_FARE, username).size();
+            totalTicketsCompletati = ticketRepository.findTicketByStatusAndUser_Username(Ticket.Status.COMPLETATO, username).size();
+            totalTicketsInCorso = ticketRepository.findTicketByStatusAndUser_Username(Ticket.Status.IN_CORSO, username).size();
+            totalTicketsDaFare = ticketRepository.findTicketByStatusAndUser_Username(Ticket.Status.DA_FARE, username).size();
         }
         // Se authentication è null, totalTickets rimangono a 0 → evita il crash
 
@@ -94,7 +94,7 @@ public class RestApiController {
         }
 
         model.addAttribute("ticketList", ticketToShow);
-        return "tickets/displayTickets";
+        return "tickets/displayTicket";
     }
 
     @GetMapping("tickets/delete/{id}")
@@ -118,7 +118,7 @@ public class RestApiController {
         model.addAttribute("statusNamesList", Ticket.Status.values());
         model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
 
-        return "/tickets/editTicket";
+        return "/tickets/edit";
     }
 
     @PostMapping("/tickets/edit/{id}")
@@ -132,7 +132,7 @@ public class RestApiController {
         }
 
         Optional<User> userOpt = userRepository.findByUsername(formTicket.getUser().getUsername());
-        formTicket.setCreationDate(oldTicket.getDataCreazione());
+        formTicket.setDataCreazione(oldTicket.getDataCreazione());
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("isAdmin", hasAuthority(authentication, "ADMIN"));
@@ -141,15 +141,15 @@ public class RestApiController {
             model.addAttribute("categories", categoryRepository.findAll());
             model.addAttribute("statusNamesList", Ticket.Status.values());
             model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
-            return "/tickets/editTicket";
+            return "/tickets/edit";
         }
 
         ticketRepository.save(formTicket);
 
         User userFound = userOpt.orElse(oldTicket.getUser());
 
-        if (formTicket.getStato() == Ticket.Status.DA_FARE || formTicket.getStato() == Ticket.Status.IN_CORSO) {
-            userFound.setStatus(User.UserStatus.DISPONIBILE);
+        if (formTicket.getStatus() == Ticket.Status.DA_FARE || formTicket.getStatus() == Ticket.Status.IN_CORSO) {
+            userFound.setStatus(User.UserStatus.ACTIVE);
             userRepository.save(userFound);
         }
 
@@ -162,7 +162,7 @@ public class RestApiController {
         model.addAttribute("statusNamesList", Ticket.Status.values());
         model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
         model.addAttribute("ticket", new Ticket());
-        return "tickets/ticketsForm";
+        return "tickets/form";
     }
 
     @PostMapping("/tickets/create")
@@ -172,22 +172,22 @@ public class RestApiController {
                                Model model,
                                Authentication authentication) {
         if (ticketRepository.findByTitolo(formTicket.getTitolo()).isPresent()) {
-            bindingResult.addError(new ObjectError("title", "There's already a ticket for this problem!"));
+            bindingResult.addError(new ObjectError("titolo", "There's already a ticket for this problem!"));
         }
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("categories", categoryRepository.findAll());
             model.addAttribute("statusNamesList", Ticket.Status.values());
             model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
-            return "tickets/ticketsForm";
+            return "tickets/form";
         }
 
-        formTicket.setCreationDate(LocalDate.now());
+        formTicket.setDataCreazione(LocalDate.now());
         ticketRepository.save(formTicket);
 
         userRepository.findByUsername(formTicket.getUser().getUsername()).ifPresent(userFound -> {
-            if (formTicket.getStato() == Ticket.Status.DA_FARE || formTicket.getStato() == Ticket.Status.IN_CORSO) {
-                userFound.setStatus(User.UserStatus.DISPONIBILE);
+            if (formTicket.getStatus() == Ticket.Status.DA_FARE || formTicket.getStatus() == Ticket.Status.IN_CORSO) {
+                userFound.setStatus(User.UserStatus.ACTIVE);
                 userRepository.save(userFound);
             }
         });

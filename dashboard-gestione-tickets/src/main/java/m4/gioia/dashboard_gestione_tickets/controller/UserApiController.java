@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/user")
@@ -33,8 +35,8 @@ public class UserApiController {
             return "redirect:/login";
         }
         String username = authentication.getName();
-        boolean canUpdateStatus = ticketRepository.findTicketByStatoAndUser_Username(Ticket.Status.DA_FARE, username).size()
-                                + ticketRepository.findTicketByStatoAndUser_Username(Ticket.Status.IN_CORSO, username).size() == 0;
+        boolean canUpdateStatus = ticketRepository.findTicketByStatusAndUser_Username(Ticket.Status.DA_FARE, username).size()
+                                + ticketRepository.findTicketByStatusAndUser_Username(Ticket.Status.IN_CORSO, username).size() == 0;
 
         Optional<User> userOpt = userRepository.findByUsername(username);
 
@@ -47,8 +49,12 @@ public class UserApiController {
             model.addAttribute("username", user.getUsername());
             model.addAttribute("userEmail", user.getEmail());
             model.addAttribute("canUpdateStatus", canUpdateStatus);
+            List<String> roles = user.getRoles().stream()
+                    .map(r -> r.getName().toString()) // o r.getName().toString() a seconda della tua entità Role
+                    .collect(Collectors.toList());
+            model.addAttribute("userRoles", roles);
         }
-        return "/user/profile";
+        return "/users/profile";
     }
 // l'operatore può cambiare il suo stato da DSIPONIBILE a NON DISPONIBILE
     @PostMapping("/profile/update-status")
@@ -58,10 +64,10 @@ public class UserApiController {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
 
-            if (status.equals("Disponibile")) {
-                user.setStatus(User.UserStatus.DISPONIBILE);
-            } else if (status.equals("Nod_Disponibile")) {
-                user.setStatus(User.UserStatus.NON_DISPONIBILE);
+            if (status.equals("ACTIVE")) {
+                user.setStatus(User.UserStatus.ACTIVE);
+            } else if (status.equals("INACTIVE")) {
+                user.setStatus(User.UserStatus.INACTIVE);
             }
 
             userRepository.save(user);
