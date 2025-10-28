@@ -1,179 +1,93 @@
 <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}" />
-
-    <!-- Google Fonts: Tech style -->
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/application.css}">
-    <title th:unless="${empty}" th:text="${ticket.titolo}"></title>
-    <title th:if="${empty}">Ticket not found</title>
+    <title th:text="${ticket != null} ? ${ticket.titolo} : 'Ticket not found'">Ticket</title>
 
     <style>
-        /* --- MATRIX STYLE CON TESTO PIÙ LEGGIBILE --- */
+        :root {
+          --accent: #48f5b6;
+          --accent-2: #66d9ff;
+          --bg-1: #071428;
+          --bg-2: #042033;
+          --glass: rgba(255,255,255,0.04);
+        }
+        html, body { height:100%; margin:0; font-family:'Inter','Share Tech Mono',monospace; }
         body {
-            background-color: #0a0a0a;
-            color: #e0ffe0; /* verde chiaro quasi bianco */
-            font-family: 'Share Tech Mono', monospace;
-            overflow-x: hidden;
+          background: linear-gradient(135deg,var(--bg-1) 0%,rgba(4,32,51,0.9) 40%,var(--bg-2) 100%);
+          color: rgba(230,247,242,0.95);
+          overflow-x:hidden;
         }
-
-        #matrix {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            width: 100%;
-            height: 100%;
-        }
-
-        h3, h5, h6 {
-        color: #ffffff; /* bianco puro */
-        text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00; /* alone verde Matrix */
-    }
-
-        p, .text-muted {
-            color: #f1f1f1 !important; /* bianco sporco */
-        }
-
-        span.text-muted, small.text-muted {
-            color: #b8ffb8 !important; /* verde tenue leggibile */
-        }
-
-        .card {
-            background-color: rgba(0, 0, 0, 0.8);
-            border: 1px solid rgba(0, 255, 0, 0.6);
-            color: #e8ffe8;
-        }
-
-        .card-header {
-            background-color: #0a0a0a !important;
-            border-bottom: 1px solid #00ff00;
-        }
-
-        .badge {
-            font-weight: bold;
-            text-shadow: 0 0 3px #00ff00;
-        }
-
-        .badge.bg-danger { background-color: #ff0000; color: #0a0a0a; }
-        .badge.bg-warning { background-color: #ffff00; color: #0a0a0a; }
-        .badge.bg-success { background-color: #00ff00; color: #0a0a0a; }
-
-        .btn-primary, .btn-outline-primary {
-            background-color: #0a0a0a;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            transition: all 0.3s ease;
-        }
-        .btn-primary:hover, .btn-outline-primary:hover {
-            background-color: #00ff00;
-            color: #0a0a0a;
-            box-shadow: 0 0 15px #00ff00;
-        }
-
-        textarea.form-control {
-            background-color: #0a0a0a;
-            color: #e8ffe8;
-            border: 1px solid #00ff00;
-        }
-
-        textarea.form-control::placeholder {
-            color: #99ff99;
-            opacity: 0.6;
-        }
-
-        hr {
-            border-top: 1px solid #00ff00;
-        }
+        #matrix { position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;mix-blend-mode:screen;opacity:0.5;filter:blur(0.6px) saturate(1.05);}
+        .page-overlay { position:fixed;inset:0;z-index:1;background:radial-gradient(ellipse at center,rgba(4,10,18,0) 0%, rgba(2,6,10,0.35) 80%);pointer-events:none;}
+        nav { position:relative; z-index:5; }
+        .card { background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(72,245,182,0.08); border-radius:12px; backdrop-filter:blur(6px); box-shadow:0 8px 30px rgba(2,6,10,0.5);}
+        .card-header { background:transparent; border-bottom:1px solid rgba(72,245,182,0.06); color:rgba(230,247,242,0.95);}
+        .btn-primary, .btn-outline-info { background:transparent; color:var(--accent); border:1px solid rgba(72,245,182,0.16);}
+        .btn-primary:hover, .btn-outline-info:hover { background: linear-gradient(90deg, rgba(72,245,182,0.95), rgba(102,217,255,0.9)); color:#02121a; box-shadow:0 14px 40px rgba(72,245,182,0.12); transform:translateY(-2px);}
+        .badge.bg-danger { background:#ff4d4d; color:#fff;}
+        .badge.bg-warning { background:#f8ff8a; color:#000;}
+        .badge.bg-success { background:#48f5b6; color:#000;}
+        .text-muted { color: rgba(230,247,242,0.7) !important;}
+        textarea.form-control { background: rgba(2,6,10,0.45); color: rgba(230,247,242,0.95); border: 1px solid rgba(72,245,182,0.08);}
+        textarea.form-control::placeholder { color:#99ff99; opacity:0.7; }
     </style>
 </head>
-
 <body>
 <canvas id="matrix"></canvas>
-
-<nav th:replace="~{navbar :: navbar('Home')}"></nav>
-
-<div class="container my-5" th:object="${ticket}" th:unless="${empty}">
+<div class="page-overlay"></div>
+<nav th:replace="~{navbar :: navbar('Tickets')}"></nav>
+<div class="container py-5" th:if="${ticket != null}">
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <div class="card shadow-sm mb-4">
+            <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="mb-0">
-                        <span th:text="*{titolo}"></span>
-                    </h3>
-                    <span th:if="*{status.name() == 'TO_DO'}" class="badge bg-danger fs-6">TO DO</span>
-                    <span th:if="*{status.name() == 'IN_PROGRESS'}" class="badge bg-warning text-dark fs-6">IN PROGRESS</span>
-                    <span th:if="*{status.name() == 'COMPLETED'}" class="badge bg-success fs-6">COMPLETED</span>
+                    <h3 th:text="*{titolo}">Ticket Title</h3>
+                    <td>
+                        <span th:if="${ticket.status == Status.DA_FARE}" class="badge bg-danger">DA FARE</span>
+                        <span th:if="${ticket.status == Status.IN_CORSO}" class="badge bg-warning">IN CORSO</span>
+                        <span th:if="${ticket.status == Status.COMPLETATO}" class="badge bg-success">COMPLETATO</span>
+                    </td>
                 </div>
                 <div class="card-body p-4">
                     <div class="row">
                         <div class="col-lg-8">
-                            <div class="mb-4">
-                                <div class="d-flex align-items-center mb-3">
-                                    <span class="text-muted">Assigned to <strong th:text="*{user.username}"></strong></span>
-                                </div>
-                                <div class="d-flex align-items-center">
-                                    <span class="text-muted" th:text="*{#temporals.format(dataCreazione, 'dd/MM/yyyy HH:mm')}"></span>
-                                </div>
-                            </div>
-
-                            <hr>
-
-                            <div class="mb-4">
-                                <h5 class="text-primary mb-3">Description</h5>
-                                <p class="text-muted" th:text="*{description}"></p>
-                            </div>
-
-                            <div class="d-flex gap-2 mb-3">
-                                <a th:href="@{/tickets}" class="btn btn-outline-primary">Back to Tickets</a>
-                            </div>
+                            <span class="text-muted">
+                     Assigned to <strong th:text="${ticket.user.username}"></strong>
+                            </span>
+                            <p th:text="*{description}"></p>
+                            <a th:href="@{/tickets}" class="btn btn-outline-info">Back to Tickets</a>
                         </div>
-
                         <div class="col-lg-4">
                             <div class="card mb-3">
                                 <div class="card-body">
-                                    <h6 class="card-title text-primary mb-3">Category</h6>
-                                    <span th:text="*{category.name}"></span>
+                                    <h6>Category</h6>
+                                    <span th:text="${ticket.category.name}"></span>
                                 </div>
                             </div>
-
                             <div class="card">
                                 <div class="card-body">
-                                    <h6 class="card-title text-primary mb-3">Notes (<span th:text="*{notes.size()}"></span>)</h6>
-
-                                    <form action="#" th:action="@{/tickets/{id}/notes/add(id=*{id})}" method="post" class="mb-3">
-                                        <div class="mb-2">
-                                            <textarea name="note" class="form-control form-control-sm" rows="3" placeholder="Add a note..." required></textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary btn-sm w-100">Add Note</button>
+                                    <h6>Notes (<span th:text="${ticket.notes.size()}"></span>)</h6>
+                                    <form th:action="@{/tickets/{id}/notes/add(id=*{id})}" method="post">
+                                        <textarea name="note" class="form-control" rows="3" placeholder="Add a note..." required></textarea>
+                                        <button type="submit" class="btn btn-primary mt-2 w-100">Add Note</button>
                                     </form>
-
-                                    <hr>
-
-                                    <div th:if="*{notes.isEmpty()}" class="text-muted small">No notes available</div>
-                                    <div th:unless="*{notes.isEmpty()}" style="max-height: 400px; overflow-y: auto;" class="border rounded p-2">
+                                    <div th:unless="${ticket.notes.isEmpty()}" style="max-height:400px; overflow-y:auto;" class="border rounded p-2">
                                         <ul class="list-unstyled mb-0">
                                             <li th:each="note : *{notes}" class="mb-3 pb-3 border-bottom">
-                                                <small>
-                                                    <strong class="text-primary" th:text=" | ${note.author.username} - ${note.author.name} ${note.author.surname}|"></strong>
-                                                    <br>
-                                                    <span class="text-muted" th:text="${note.content}"></span>
-                                                    <br>
-                                                    <span class="text-muted" style="font-size: 0.75rem;" th:text="${#temporals.format(note.createdAt, 'dd/MM/yyyy HH:mm')}"></span>
-                                                </small>
+                                                <small><strong th:text="${note.author.username}" class="text-primary"></strong><br>
+                                                    <span th:text="${note.content}" class="text-muted"></span><br>
+                                                    <span th:text="${#temporals.format(note.createdAt,'dd/MM/yyyy HH:mm')}" style="font-size:0.75rem;" class="text-muted"></span></small>
                                             </li>
                                         </ul>
                                     </div>
                                 </div>
                             </div>
-
-                        </div>
+                        </div> <!-- col-lg-4 -->
                     </div>
                 </div>
             </div>
@@ -181,53 +95,13 @@
     </div>
 </div>
 
-<div class="container my-5" th:if="${empty}">
-    <div class="row justify-content-center">
-        <div class="col-md-6 text-center">
-            <div class="card shadow-sm">
-                <div class="card-body p-5">
-                    <h2 class="mb-3">Ticket Not Found</h2>
-                    <p class="text-muted mb-4">The ticket you're looking for does not exist</p>
-                    <a th:href="@{/tickets}" class="btn btn-primary">Back to Tickets</a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.bundle.min.js}"></script>
-
 <script>
-    // Matrix background effect
-    const c = document.getElementById("matrix");
-    const ctx = c.getContext("2d");
-    c.height = window.innerHeight;
-    c.width = window.innerWidth;
-
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
-    const fontSize = 16;
-    const columns = c.width / fontSize;
-    const drops = Array(Math.floor(columns)).fill(1);
-
-    function draw() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-        ctx.fillRect(0, 0, c.width, c.height);
-        ctx.fillStyle = "#0F0";
-        ctx.font = fontSize + "px monospace";
-        for (let i = 0; i < drops.length; i++) {
-            const text = letters.charAt(Math.floor(Math.random() * letters.length));
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-            if (drops[i] * fontSize > c.height && Math.random() > 0.975) drops[i] = 0;
-            drops[i]++;
-        }
-    }
-    setInterval(draw, 35);
-
-    window.addEventListener('resize', () => {
-        c.width = window.innerWidth;
-        c.height = window.innerHeight;
-    });
+    const c = document.getElementById("matrix"); const ctx=c.getContext("2d"); function resetCanvas(){c.width=window.innerWidth;c.height=window.innerHeight;} resetCanvas();
+    let letters="abcdefghijklmnopqrstuvwxyz0123456789@#"; const fontSize=14; let columns=Math.floor(c.width/fontSize); let drops=Array(columns).fill(1);
+    window.addEventListener('resize',()=>{resetCanvas(); columns=Math.floor(c.width/fontSize); drops=Array(columns).fill(1);});
+    function draw(){ ctx.fillStyle="rgba(6,10,14,0.12)"; ctx.fillRect(0,0,c.width,c.height); ctx.fillStyle="rgba(72,245,182,0.82)"; ctx.font=fontSize+"px monospace"; for(let i=0;i<drops.length;i++){ const text=letters.charAt(Math.floor(Math.random()*letters.length)); const x=i*fontSize; const y=drops[i]*fontSize; ctx.fillText(text,x,y); if(y>c.height && Math.random()>0.98) drops[i]=0; drops[i]++;} }
+    let then=0; const fps=30; function animate(now){requestAnimationFrame(animate); const elapsed=now-then; if(elapsed>(1000/fps)){ then=now; draw(); } } requestAnimationFrame(animate);
 </script>
-
 </body>
 </html>

@@ -1,168 +1,85 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}" />
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/application.css}">
-    <title>New Ticket</title>
+    <title th:text="${ticket != null and ticket.id != null} ? ${ticket.titolo} : 'Create Ticket'">Ticket</title>
 
     <style>
-        body {
-            background-color: #0a0a0a;
-            color: #00ff00;
-            font-family: 'Share Tech Mono', monospace;
+        :root{
+            --accent: #48f5b6;
+            --accent-2: #66d9ff;
+            --bg-1: #071428;
+            --bg-2: #042033;
+            --glass: rgba(255,255,255,0.04);
         }
-
-        #matrix {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: -1;
-            width: 100%;
-            height: 100%;
-        }
-
-        h3, h5, h6 {
-            color: #ffffff; /* bianco puro */
-            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00; /* alone verde Matrix */
-        }
-
-        .card {
-            background-color: rgba(0,0,0,0.85);
-            border: 1px solid #00ff00;
-        }
-
-        .form-control, .form-select {
-            background-color: #0a0a0a;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-        }
-
-        .form-control:focus, .form-select:focus {
-            box-shadow: 0 0 10px #00ff00;
-            border-color: #00ff00;
-        }
-
-        .btn-primary, .btn-outline-secondary {
-            background-color: #0a0a0a;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover, .btn-outline-secondary:hover {
-            background-color: #00ff00;
-            color: #0a0a0a;
-            box-shadow: 0 0 15px #00ff00;
-        }
-
-        .badge {
-            font-weight: bold;
-            text-shadow: 0 0 3px #00ff00;
-        }
-
-        .badge.bg-danger { background-color: #ff0000; color: #0a0a0a; }
-        .badge.bg-warning { background-color: #ffff00; color: #0a0a0a; }
-        .badge.bg-success { background-color: #00ff00; color: #0a0a0a; }
-
-        .text-muted {
-            color: #00ff00 !important;
-        }
-
-        hr {
-            border-color: #00ff00;
-        }
+        html,body { height:100%; margin:0; font-family: 'Inter', 'Share Tech Mono', monospace; }
+        body { background: linear-gradient(135deg, var(--bg-1), var(--bg-2)); color: rgba(230,247,242,0.95); overflow-x:hidden; }
+        #matrix { position: fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none; mix-blend-mode:screen; opacity:0.5; filter: blur(0.6px) saturate(1.05); }
+        .page-overlay { position: fixed; inset:0; z-index:1; background: radial-gradient(ellipse at center, rgba(4,10,18,0) 0%, rgba(2,6,10,0.35) 80%); pointer-events:none; }
+        .card { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border: 1px solid rgba(72,245,182,0.08); border-radius:12px; backdrop-filter: blur(6px); box-shadow:0 8px 30px rgba(2,6,10,0.5); }
+        .card-header { background: transparent; border-bottom:1px solid rgba(72,245,182,0.06); color: rgba(230,247,242,0.95); }
+        h3,h5 { color:#e6f7f2; text-shadow:0 6px 18px rgba(0,0,0,0.6); }
+        .btn-primary, .btn-outline-info { background-color: transparent; color: var(--accent); border:1px solid rgba(72,245,182,0.16); }
+        .btn-primary:hover, .btn-outline-info:hover { background: linear-gradient(90deg, rgba(72,245,182,0.95), rgba(102,217,255,0.9)); color:#02121a; box-shadow:0 14px 40px rgba(72,245,182,0.12); transform: translateY(-2px); }
+        .form-control, .form-select, textarea { background: rgba(2,6,10,0.45); color: rgba(230,247,242,0.95); border:1px solid rgba(72,245,182,0.08); }
+        .form-control::placeholder { color: rgba(153,255,153,0.7); }
     </style>
 </head>
 
 <body>
 <canvas id="matrix"></canvas>
+<div class="page-overlay"></div>
 
-<nav th:replace="~{navbar :: navbar('Home')}"></nav>
+<nav th:replace="~{navbar :: navbar('Tickets')}"></nav>
 
-<div class="container my-5">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card shadow-sm">
-                <div class="card-header bg-dark text-white">
-                    <h3 class="mb-0">New Ticket</h3>
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 th:text="${ticket != null and ticket.id != null} ? 'Edit Ticket' : 'Create New Ticket'">Create New Ticket</h3>
                 </div>
-                <div class="card-body p-4">
-                    <form id="ticket-form" th:object="${ticket}" th:action="@{/tickets/create}" method="post">
-                        <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger" role="alert">
-                            <strong>Validation Errors:</strong>
-                            <ul class="mb-0">
-                                <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
-                            </ul>
+                <div class="card-body">
+                    <form th:action="${ticket != null and ticket.id != null} ? @{/tickets/{id}/edit(id=${ticket.id})} : @{/tickets/create}" th:object="${ticket}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+                        <div class="mb-3">
+                            <label for="titolo" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="titolo" th:field="*{titolo}" placeholder="Enter ticket title" required/>
                         </div>
 
-                        <div class="row">
-                            <div class="col-lg-8">
-                                <div class="row gy-3">
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold" for="titolo">Title</label>
-                                        <input id="titolo" type="text" class="form-control" th:field="*{titolo}" placeholder="Insert Ticket's title">
-                                    </div>
-
-                                    <div class="col-12">
-                                        <label class="form-label fw-semibold" for="description">Description</label>
-                                        <textarea id="description" class="form-control" th:field="*{description}" rows="5" placeholder="Describe the problem"></textarea>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold" for="status">Status</label>
-                                        <select id="status" class="form-select" th:field="*{status}">
-                                            <option th:each="item : ${statusNamesList}" th:value="${item}" th:text="${item}"></option>
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <label class="form-label fw-semibold" for="category">Category</label>
-                                        <select id="category" class="form-select" th:field="*{category.id}">
-                                            <option value="">Select a category</option>
-                                            <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
-                                        </select>
-                                    </div>
-
-                                    <div class="col-md-12">
-                                        <label class="form-label fw-semibold" for="user">Operator</label>
-                                        <select id="user" class="form-select" th:field="*{user.id}">
-                                            <option value="">Select an Operator</option>
-                                            <option th:each="operator : ${operators}" th:value="${operator.id}" th:text="${operator.username}"></option>
-                                        </select>
-                                    </div>
-
-                                    <div class="col-12 mt-4">
-                                        <button class="btn btn-primary" type="submit">Save Ticket</button>
-                                        <a th:href="@{/tickets}" class="btn btn-outline-secondary">Cancel</a>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="col-lg-4">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <h5 class="card-title mb-3">Information</h5>
-                                        <div class="mb-3">
-                                            <small class="text-muted d-block mb-1">Available Statuses:</small>
-                                            <div>
-                                                <span class="badge bg-danger me-1">TO_DO</span>
-                                                <span class="badge bg-warning text-dark me-1">IN_PROGRESS</span>
-                                                <span class="badge bg-success">COMPLETED</span>
-                                            </div>
-                                        </div>
-                                        <hr>
-                                        <small class="text-muted">
-                                            <strong>Note:</strong> All fields are mandatory. Make sure to fill the form properly before saving.
-                                        </small>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" rows="4" th:field="*{description}" placeholder="Enter ticket description" required></textarea>
                         </div>
+
+                        <div class="mb-3">
+                            <label for="category" class="form-label">Category</label>
+                            <select class="form-select" id="category" th:field="*{category}" required>
+                                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}">Category</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="user" class="form-label">Assign to Operator</label>
+                            <select class="form-select" id="user" th:field="*{user}" required>
+                                <option th:each="op : ${operators}" th:value="${op.id}" th:text="${op.username}">Operator</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" th:field="*{status}" required>
+                                <option th:each="st : ${statusNamesList}" th:value="${st}" th:text="${st}">Status</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100" th:text="${ticket != null and ticket.id != null} ? 'Save Changes' : 'Create Ticket'">Create Ticket</button>
                     </form>
                 </div>
             </div>
@@ -171,38 +88,46 @@
 </div>
 
 <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.bundle.min.js}"></script>
-
 <script>
-    // Matrix background effect
     const c = document.getElementById("matrix");
     const ctx = c.getContext("2d");
-    c.height = window.innerHeight;
-    c.width = window.innerWidth;
 
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
-    const fontSize = 16;
-    const columns = c.width / fontSize;
-    const drops = Array(Math.floor(columns)).fill(1);
+    function resetCanvas(){ c.width=window.innerWidth; c.height=window.innerHeight; }
+    resetCanvas();
 
-    function draw() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-        ctx.fillRect(0, 0, c.width, c.height);
-        ctx.fillStyle = "#0F0";
-        ctx.font = fontSize + "px monospace";
-        for (let i = 0; i < drops.length; i++) {
-            const text = letters.charAt(Math.floor(Math.random() * letters.length));
-            ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-            if (drops[i] * fontSize > c.height && Math.random() > 0.975) drops[i] = 0;
+    let letters = "abcdefghijklmnopqrstuvwxyz0123456789@#";
+    const fontSize = 14;
+    let columns = Math.floor(c.width / fontSize);
+    let drops = Array(columns).fill(1);
+
+    window.addEventListener('resize', ()=>{
+        resetCanvas();
+        columns = Math.floor(c.width / fontSize);
+        drops = Array(columns).fill(1);
+    });
+
+    function draw(){
+        ctx.fillStyle = "rgba(6,10,14,0.12)";
+        ctx.fillRect(0,0,c.width,c.height);
+        ctx.fillStyle = "rgba(72,245,182,0.82)";
+        ctx.font = fontSize+"px monospace";
+        for(let i=0;i<drops.length;i++){
+            const text = letters.charAt(Math.floor(Math.random()*letters.length));
+            const x = i*fontSize;
+            const y = drops[i]*fontSize;
+            ctx.fillText(text,x,y);
+            if(y>c.height && Math.random()>0.98) drops[i]=0;
             drops[i]++;
         }
     }
-    setInterval(draw, 35);
 
-    window.addEventListener('resize', () => {
-        c.width = window.innerWidth;
-        c.height = window.innerHeight;
-    });
+    let then=0, fps=30;
+    function animate(now){
+        requestAnimationFrame(animate);
+        const elapsed = now-then;
+        if(elapsed > (1000/fps)){ then=now; draw(); }
+    }
+    requestAnimationFrame(animate);
 </script>
-
 </body>
 </html>

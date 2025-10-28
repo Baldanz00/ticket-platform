@@ -9,19 +9,35 @@
     <!-- Bootstrap CSS -->
     <link th:rel="stylesheet" th:href="@{/webjars/bootstrap/5.1.3/css/bootstrap.min.css}" />
 
-    <!-- Google Fonts: Tech style -->
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" th:href="@{/css/application.css}">
     <title>Issue Management Console</title>
 
     <style>
         /* Body + Font */
+        :root{
+            --accent: #48f5b6;        /* soft mint */
+            --accent-2: #66d9ff;      /* soft cyan */
+            --bg-1: #0f1724;          /* deep navy */
+            --bg-2: #05293a;          /* teal deep */
+            --glass: rgba(255,255,255,0.06);
+            --glass-strong: rgba(255,255,255,0.08);
+        }
+
+        html,body {
+            height: 100%;
+        }
+
         body {
-            background-color: #0a0a0a;
-            color: #00ff00;
-            font-family: 'Share Tech Mono', monospace;
+            margin: 0;
+            font-family: 'Inter', 'Share Tech Mono', monospace;
+            background: linear-gradient(135deg, var(--bg-1) 0%, #071428 40%, var(--bg-2) 100%);
+            color: #e6f7f2;
             overflow-x: hidden;
+            -webkit-font-smoothing:antialiased;
+            -moz-osx-font-smoothing:grayscale;
         }
 
         /* Matrix Canvas */
@@ -29,158 +45,237 @@
             position: fixed;
             top: 0;
             left: 0;
-            z-index: -1;
+            z-index: 0;
             width: 100%;
             height: 100%;
+            pointer-events: none;
+            mix-blend-mode: screen; /* blend to create glow */
+            opacity: 0.55;          /* soften overall effect */
+            filter: blur(0.6px) saturate(1.05);
         }
 
-        /* Titles */
-        h1.display-3, h2, h3.display-4 {
-            color: #ffffff; /* bianco puro */
-            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00; /* alone verde Matrix */
+        /* Page overlay to add subtle vignette */
+        .page-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1;
+            background: radial-gradient(ellipse at center, rgba(10,20,30,0) 0%, rgba(3,6,10,0.35) 80%);
+            pointer-events: none;
         }
 
-        /* Flicker animation */
-        @keyframes flicker {
-            0%, 18%, 22%, 25%, 53%, 57%, 100% {
-                opacity: 1;
-                text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
-            }
-            20%, 24%, 55% {
-                opacity: 0.5;
-                text-shadow: none;
-            }
+        /* Navbar placeholder (if you replace via th:replace) should be above canvas */
+        nav {
+            z-index: 5;
+            position: relative;
         }
+
+        /* Hero */
+        .hero {
+            position: relative;
+            z-index: 2;
+            padding: 80px 0 40px;
+            text-align: center;
+        }
+
         h1.display-3 {
-            animation: flicker 1.5s infinite;
+            color: #ffffff;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            margin-bottom: 18px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: clamp(2rem, 4.5vw, 3.4rem);
+            text-shadow: 0 6px 28px rgba(72,245,182,0.08), 0 2px 6px rgba(0,0,0,0.6);
         }
 
-        /* Buttons Neon */
-        .btn-light {
-            background-color: #0a0a0a;
-            color: #00ff00;
-            border: 1px solid #00ff00;
-            transition: all 0.3s ease;
-        }
-        .btn-light:hover {
-            background-color: #00ff00;
-            color: #0a0a0a;
-            box-shadow: 0 0 20px #00ff00;
+        .hero .lead {
+            color: rgba(230,247,242,0.9);
+            font-size: 1.05rem;
+            margin-bottom: 24px;
         }
 
-        /* Sections background */
-        .bg-primary, .bg-light {
-            background-color: #0a0a0a !important;
-        }
-
-        /* Text muted */
-        .text-muted {
-            color: #00ff00 !important;
-            text-shadow: 0 0 3px #00ff00;
-        }
-
-        /* Statistics cards */
-        .stat-card {
-            background-color: rgba(0, 0, 0, 0.6);
-            border: 1px solid #00ff00;
+        .btn-mint {
+            background: linear-gradient(90deg, rgba(72,245,182,1), rgba(102,217,255,0.95));
+            border: none;
+            color: #02121a;
+            font-weight: 600;
+            padding: .7rem 1.25rem;
             border-radius: 10px;
+            box-shadow: 0 8px 28px rgba(72,245,182,0.12);
+            transition: transform .16s ease, box-shadow .16s ease;
+        }
+        .btn-mint:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 40px rgba(72,245,182,0.16);
+        }
+
+        /* Cards - glassmorphism */
+        .stat-card {
+            position: relative;
+            z-index: 2;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+            border: 1px solid rgba(72,245,182,0.12);
+            backdrop-filter: blur(6px) saturate(1.05);
+            border-radius: 14px;
             padding: 20px;
-            transition: transform 0.3s, box-shadow 0.3s;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            transition: transform .18s ease, box-shadow .18s ease;
         }
-
         .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 0 15px #00ff00;
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(2,6,10,0.45);
+        }
+        .stat-card .num {
+            font-weight: 700;
+            font-size: 2.2rem;
+            color: #ffffff;
+            letter-spacing: 0.6px;
+        }
+        .stat-card .label {
+            color: rgba(230,247,242,0.85);
+            font-size: .95rem;
+            margin-top: .4rem;
         }
 
-        /* Testo bianco dentro le card */
-        .stat-card h3,
-        .stat-card p {
-            color: #ffffff !important; /* bianco puro */
-            text-shadow: none;
+        /* Smaller components */
+        .container-glass {
+            position: relative;
+            z-index: 2;
+            padding: 40px 20px;
+        }
+
+        /* Footer and other text */
+        .text-muted {
+            color: rgba(230,247,242,0.7) !important;
+        }
+
+        /* Responsive tweaks */
+        @media (max-width: 768px) {
+            .hero { padding: 56px 0 24px; }
+            .stat-card .num { font-size: 1.6rem; }
         }
     </style>
 </head>
 
 <body>
 <canvas id="matrix"></canvas>
+<div class="page-overlay"></div>
 
 <nav th:replace="~{navbar :: navbar('Home')}"></nav>
 
 <!-- Hero Section -->
-<div class="container-fluid py-5 text-center">
-    <div class="container py-5">
-        <h1 class="display-3 fw-bold mb-4">Issue Management Console</h1>
-        <a href="/tickets" class="btn btn-light btn-lg px-5">Go to Tickets</a>
+<section class="hero">
+    <div class="container">
+        <h1 class="display-3 fw-bold">Issue Management Console</h1>
+        <p class="lead">A dashboard to manage your tickets — fast, clear and secure.</p>
+        <a th:href="@{/tickets}" class="btn btn-mint btn-lg">Go to Tickets</a>
     </div>
-</div>
+</section>
 
 <!-- Statistics Section -->
-<div class="py-5">
-    <div class="container">
-        <h2 class="text-center mb-5">System Statistics</h2>
-        <div class="row text-center g-4">
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <h3 class="display-4 fw-bold" th:text="${totalTickets}"></h3>
-                    <p>Total Tickets</p>
-                </div>
+<section class="container container-glass">
+    <h2 class="text-center mb-4" style="color: rgba(255,255,255,0.95);">System Statistics</h2>
+
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="num" th:text="${TicketTotali}">0</div>
+                <div class="label">Total Tickets</div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <h3 class="display-4 fw-bold" th:text="${completedTicketsCompletati}"></h3>
-                    <p>Completati</p>
-                </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="num" th:text="${TicketCompletati}">0</div>
+                <div class="label">Completati</div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <h3 class="display-4 fw-bold" th:text="${totalTicketsInCorso}"></h3>
-                    <p>In Corso</p>
-                </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="num" th:text="${TicketInCorso}">0</div>
+                <div class="label">In Corso</div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <h3 class="display-4 fw-bold" th:text="${totalTicketsDaFare}"></h3>
-                    <p>Da fare</p>
-                </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stat-card">
+                <div class="num" th:text="${TicketDaFare}">0</div>
+                <div class="label">Da fare</div>
             </div>
         </div>
     </div>
-</div>
+</section>
+
+<!-- Optional small footer -->
+<footer class="container text-center text-muted" style="margin-top:38px; margin-bottom:38px; z-index:2; position:relative;">
+    <small>© 2025 Issue Management Console</small>
+</footer>
 
 <!-- Bootstrap Bundle with Popper -->
 <script th:src="@{/webjars/bootstrap/5.1.3/js/bootstrap.bundle.min.js}"></script>
 
-<!-- Matrix effect JS -->
+<!-- Matrix effect JS (softened colors + fewer characters for elegance) -->
 <script>
     const c = document.getElementById("matrix");
     const ctx = c.getContext("2d");
-    c.height = window.innerHeight;
-    c.width = window.innerWidth;
 
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()*&^%";
-    const fontSize = 16;
-    const columns = c.width / fontSize;
-    const drops = Array(Math.floor(columns)).fill(1);
+    function resetCanvasSize() {
+        c.width = window.innerWidth;
+        c.height = window.innerHeight;
+    }
+    resetCanvasSize();
+
+    const letters = "abcdefghijklmnopqrstuvwxyz0123456789@#";
+    const fontSize = 14;
+    let columns = Math.floor(c.width / fontSize);
+    let drops = Array(columns).fill(1);
+
+    function resizeHandler() {
+        resetCanvasSize();
+        columns = Math.floor(c.width / fontSize);
+        drops = Array(columns).fill(1);
+    }
+    window.addEventListener('resize', resizeHandler);
 
     function draw() {
-        ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+        // translucent dark overlay to create trailing effect
+        ctx.fillStyle = "rgba(6,10,14,0.12)";
         ctx.fillRect(0, 0, c.width, c.height);
-        ctx.fillStyle = "#0F0";
+
+        // soft mint color with slight cyan shift
+        ctx.fillStyle = "rgba(72,245,182,0.85)";
         ctx.font = fontSize + "px monospace";
-        for(let i = 0; i < drops.length; i++){
-            const text = letters.charAt(Math.floor(Math.random()*letters.length));
-            ctx.fillText(text, i*fontSize, drops[i]*fontSize);
-            if(drops[i]*fontSize > c.height && Math.random() > 0.975) drops[i] = 0;
+
+        for (let i = 0; i < drops.length; i++) {
+            const text = letters.charAt(Math.floor(Math.random() * letters.length));
+            const x = i * fontSize;
+            const y = drops[i] * fontSize;
+
+            // fade the head slightly brighter
+            ctx.fillText(text, x, y);
+
+            if (y > c.height && Math.random() > 0.98) {
+                drops[i] = 0;
+            }
             drops[i]++;
         }
     }
-    setInterval(draw, 35);
 
-    window.addEventListener('resize', () => {
-        c.width = window.innerWidth;
-        c.height = window.innerHeight;
-    });
+    // use requestAnimationFrame for smoother animation and control
+    let then = 0;
+    const fps = 30;
+    function animate(now) {
+        requestAnimationFrame(animate);
+        const elapsed = now - then;
+        if (elapsed > (1000 / fps)) {
+            then = now;
+            draw();
+        }
+    }
+    requestAnimationFrame(animate);
 </script>
 
 </body>

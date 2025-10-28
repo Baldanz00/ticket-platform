@@ -79,30 +79,37 @@ public class RestApiController {
         return "index";
     }
 
-    @GetMapping("/tickets") //recupera i ticket dal db in base al ruolo
+    @GetMapping("/tickets")
     public String getTickets(Model model,
                              @RequestParam(name = "keyword", required = false) String keyword,
                              Authentication authentication) {
+
         Set<Ticket> ticketToShow = new HashSet<>();
 
-        if (hasAuthority(authentication, "OPERATOR") && authentication != null) {
+        if (authentication != null && hasAuthority(authentication, "OPERATOR")) {
             ticketToShow.addAll(ticketRepository.findByUser_Username(authentication.getName()));
         }
 
-        if (hasAuthority(authentication, "ADMIN")) {
+        if (authentication != null && hasAuthority(authentication, "ADMIN")) {
             ticketToShow.addAll(ticketRepository.findAll());
         }
 
-        if (keyword != null) {
-            ticketToShow.removeIf(ticket -> !ticket.getTitolo().contains(keyword));
+        if (keyword != null && !keyword.isEmpty()) {
+            String kw = keyword.toLowerCase();
+            ticketToShow.removeIf(ticket -> ticket.getTitolo() == null || !ticket.getTitolo().toLowerCase().contains(kw));
         }
-        model.addAttribute("ticketList", ticketToShow);
+
+        // NON lasciare null
+        model.addAttribute("ticketList", ticketToShow != null ? ticketToShow : new HashSet<>());
+        model.addAttribute("Status", Ticket.Status.class);
+
         return "tickets/displayTicket";
     }
 
     @PostMapping("/tickets/delete/{id}")
     public String delete(@PathVariable("id") Long id) {
         ticketRepository.deleteById(id);
+
         return "redirect:/tickets";
     }
 
@@ -257,7 +264,7 @@ public class RestApiController {
 
         // Indica se è ADMIN (solo admin può aggiungere note)
         model.addAttribute("isAdmin", hasAuthority(authentication, "ADMIN"));
-
+        model.addAttribute("Status", Ticket.Status.class);
         return "tickets/ticketDetail";
     }
 
