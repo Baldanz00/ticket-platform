@@ -43,7 +43,7 @@
         <form th:object="${ticket}" th:action="@{/tickets/edit/{id}(id=${ticket.id})}" method="post">
 
             <!-- CSRF token -->
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <input type="hidden" th:name="${_csrf?.parameterName}" th:value="${_csrf?.token}" />
             <div th:if="${#fields.hasErrors('*')}" class="alert alert-danger" role="alert">
                 <strong>Validation Errors:</strong>
                 <ul class="mb-0">

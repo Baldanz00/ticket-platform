@@ -53,7 +53,6 @@ public class RestApiController {
 
     @GetMapping("/")
     public String getHome(Model model, Authentication authentication) {
-
         if(authentication == null){
             return "redirect:/login";
         }
@@ -61,7 +60,6 @@ public class RestApiController {
         int totalTicketsInCorso = 0;
         int totalTicketsDaFare = 0;
         int totalTickets = 0;
-
         if (hasAuthority(authentication, "ADMIN")) {
             totalTicketsCompletati = ticketRepository.findTicketByStatus(Ticket.Status.COMPLETATO).size();
             totalTicketsInCorso = ticketRepository.findTicketByStatus(Ticket.Status.IN_CORSO).size();
@@ -73,18 +71,15 @@ public class RestApiController {
             totalTicketsInCorso = ticketRepository.findTicketByStatusAndUser_Username(Ticket.Status.IN_CORSO, username).size();
             totalTicketsDaFare = ticketRepository.findTicketByStatusAndUser_Username(Ticket.Status.DA_FARE, username).size();
         }
-
         totalTickets = totalTicketsCompletati + totalTicketsInCorso + totalTicketsDaFare;
-
         model.addAttribute("TicketTotali", totalTickets);
         model.addAttribute("TicketCompletati", totalTicketsCompletati);
         model.addAttribute("TicketInCorso", totalTicketsInCorso);
         model.addAttribute("TicketDaFare", totalTicketsDaFare);
-
         return "index";
     }
 
-    @GetMapping("/tickets")
+    @GetMapping("/tickets") //recupera i ticket dal db in base al ruolo
     public String getTickets(Model model,
                              @RequestParam(name = "keyword", required = false) String keyword,
                              Authentication authentication) {
@@ -101,7 +96,6 @@ public class RestApiController {
         if (keyword != null) {
             ticketToShow.removeIf(ticket -> !ticket.getTitolo().contains(keyword));
         }
-
         model.addAttribute("ticketList", ticketToShow);
         return "tickets/displayTicket";
     }
@@ -116,18 +110,14 @@ public class RestApiController {
     public String edit(@PathVariable Long id, Model model, Authentication authentication, CsrfToken csrfToken) {
         Optional<Ticket> optTicket = ticketRepository.findById(id);
         if (optTicket.isEmpty()) return "redirect:/tickets";
-
         Ticket ticket = optTicket.get();
-
         model.addAttribute("ticket", ticket);
         model.addAttribute("isAdmin", hasAuthority(authentication, "ADMIN"));
         model.addAttribute("isOperator", hasAuthority(authentication, "OPERATOR"));
         model.addAttribute("categories", categoryRepository.findAll());
         model.addAttribute("statusNamesList", Ticket.Status.values());
         model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
-
-        model.addAttribute("_csrf", csrfToken); // 🔹 aggiungi CSRF
-
+        model.addAttribute("_csrf", csrfToken);
         return "tickets/edit";
     }
 
@@ -138,26 +128,36 @@ public class RestApiController {
             BindingResult bindingResult,
             Model model,
             Authentication authentication,
-            RedirectAttributes redirectAttributes) {
-
-        // 1️⃣ Recupera il ticket esistente
+            RedirectAttributes redirectAttributes,
+            CsrfToken csrfToken) {
         Ticket oldTicket = ticketRepository.findById(id).orElse(null);
         if (oldTicket == null) {
             redirectAttributes.addFlashAttribute("errorMessage", "Ticket not found.");
             return "redirect:/tickets";
         }
-
-        // 2️⃣ Recupera l'utente assegnato al ticket dal DB (oggetto gestito da JPA)
+        //  Recupera l'utente selezionato
         User user = userRepository.findById(formTicket.getUser().getId())
-                .orElse(oldTicket.getUser()); // fallback all'utente esistente
-
-        // 3️⃣ Mantieni la data di creazione originale
+                .orElse(oldTicket.getUser());
+        //  Verifica se l'utente è ACTIVE se chi modifica è ADMIN
+        if (hasAuthority(authentication, "ADMIN") && user.getStatus() != User.UserStatus.ACTIVE) {
+            if (csrfToken != null) {
+                model.addAttribute("_csrf", csrfToken);
+            }
+            model.addAttribute("isAdmin", true);
+            model.addAttribute("isOperator", hasAuthority(authentication, "OPERATOR"));
+            model.addAttribute("ticket", oldTicket);
+            model.addAttribute("categories", categoryRepository.findAll());
+            model.addAttribute("statusNamesList", Ticket.Status.values());
+            model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
+            model.addAttribute("errorMessage", "Non puoi assegnare il ticket a un operatore inattivo.");
+            return "tickets/edit";
+        }
         formTicket.setDataCreazione(oldTicket.getDataCreazione());
-        // 4️⃣ Mantieni eventuali note esistenti
         formTicket.setNotes(oldTicket.getNotes());
-
-        // 5️⃣ Se ci sono errori di validazione, torna al form
         if (bindingResult.hasErrors()) {
+            if (csrfToken != null) {
+                model.addAttribute("_csrf", csrfToken);
+            }
             model.addAttribute("isAdmin", hasAuthority(authentication, "ADMIN"));
             model.addAttribute("isOperator", hasAuthority(authentication, "OPERATOR"));
             model.addAttribute("ticket", oldTicket);
@@ -166,27 +166,16 @@ public class RestApiController {
             model.addAttribute("operators", userRepository.findByRoles_Name("OPERATOR"));
             return "tickets/edit";
         }
-
-        // 6️⃣ Associa l'utente gestito al ticket
+        //  Associa l'utente e salva il ticket
         formTicket.setUser(user);
-
-        // 7️⃣ Salva il ticket
         ticketRepository.save(formTicket);
-
-        // 8️⃣ Aggiorna lo status dell'utente in base ai ticket ancora attivi
+        // Aggiorna lo status dell'utente in base ai ticket ancora attivi
         List<Ticket> activeTickets = ticketRepository.findByUserIdAndStatusIn(
                 user.getId(),
                 Arrays.asList(Ticket.Status.DA_FARE, Ticket.Status.IN_CORSO)
         );
-
-        if (activeTickets.isEmpty()) {
-            user.setStatus(User.UserStatus.INACTIVE); // Nessun ticket attivo
-        } else {
-            user.setStatus(User.UserStatus.ACTIVE); // Almeno un ticket DA_FARE o IN_CORSO
-        }
-
+        user.setStatus(activeTickets.isEmpty() ? User.UserStatus.INACTIVE : User.UserStatus.ACTIVE);
         userRepository.save(user);
-
         redirectAttributes.addFlashAttribute("successMessage", "Ticket updated successfully!");
         return "redirect:/tickets";
     }
@@ -207,7 +196,6 @@ public class RestApiController {
         // Se ci sono ticket attivi, non permettere INACTIVE
         if (!activeTickets.isEmpty() && newStatus == User.UserStatus.INACTIVE) {
             // Mantieni lo status precedente e opzionalmente aggiungi messaggio di errore
-            // Esempio: redirect con alert
             return "redirect:/users/profile/" + id + "?error=activeTickets";
         }
 

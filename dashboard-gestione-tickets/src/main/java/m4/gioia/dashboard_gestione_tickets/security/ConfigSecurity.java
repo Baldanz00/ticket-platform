@@ -29,8 +29,8 @@ public class ConfigSecurity {
                         .defaultSuccessUrl("/tickets", true)
                         .permitAll()
                 )
-                .logout(logout -> logout.permitAll())
-                .csrf(csrf -> csrf.disable());
+                .logout(logout -> logout.permitAll());
+              //  .csrf(csrf -> csrf.disable()); -> tocken per evitare che un sito x possa mandare richieste GET ed eliminarmi un ticket a caso
 
         http.authenticationProvider(authenticationProvider());
 
