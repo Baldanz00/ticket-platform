@@ -99,7 +99,6 @@ public class RestApiController {
             ticketToShow.removeIf(ticket -> ticket.getTitolo() == null || !ticket.getTitolo().toLowerCase().contains(kw));
         }
 
-        // NON lasciare null
         model.addAttribute("ticketList", ticketToShow != null ? ticketToShow : new HashSet<>());
         model.addAttribute("Status", Ticket.Status.class);
 
@@ -202,11 +201,10 @@ public class RestApiController {
 
         // Se ci sono ticket attivi, non permettere INACTIVE
         if (!activeTickets.isEmpty() && newStatus == User.UserStatus.INACTIVE) {
-            // Mantieni lo status precedente e opzionalmente aggiungi messaggio di errore
             return "redirect:/users/profile/" + id + "?error=activeTickets";
         }
 
-        // Altrimenti aggiorna lo status scelto manualmente
+        // Altrimenti aggiorno lo status scelto manualmente
         user.setStatus(newStatus);
         userRepository.save(user);
 

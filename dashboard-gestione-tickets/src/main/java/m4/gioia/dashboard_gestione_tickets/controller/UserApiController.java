@@ -51,7 +51,7 @@ public class UserApiController {
             model.addAttribute("userEmail", user.getEmail());
             model.addAttribute("canUpdateStatus", canUpdateStatus);
             List<String> roles = user.getRoles().stream()
-                    .map(r -> r.getName().toString()) // o r.getName().toString() a seconda della tua entità Role
+                    .map(r -> r.getName().toString())
                     .collect(Collectors.toList());
             model.addAttribute("userRoles", roles);
         }
@@ -86,7 +86,7 @@ public class UserApiController {
                 user.setStatus(User.UserStatus.INACTIVE);
 
             } else if (status.equalsIgnoreCase("ACTIVE") || status.equalsIgnoreCase("AVAILABLE")) {
-                user.setStatus(User.UserStatus.ACTIVE); // o AVAILABLE se hai questo enum
+                user.setStatus(User.UserStatus.ACTIVE);
             }
 
             userRepository.save(user);

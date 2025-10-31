@@ -19,7 +19,7 @@ public class DBUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        System.out.println("=== LOGIN DEBUG ===");
+        System.out.println("=== LOGIN DEBUG ==="); //aggiunta di debug per verificare i dati inseriti in db
         System.out.println("Username ricercato: " + username);
 
         Optional<User> userOpt = userRepository.findByUsername(username);
